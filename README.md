@@ -36,12 +36,10 @@ Teams of 5 (at least 1 builder, 1 product or design, 1 domain expert; plus found
 
 | Name | Role / background |
 |---|---|
-| [Mehul Patel](https://github.com/nomadicmehul) *(example)* | Claude Ambassador, DevRel |
-| [Your name](https://www.linkedin.com/in/your-profile) | Builder / Product or design / Domain expert / Founder |
-| [Your name](https://github.com/your-username) | |
-| [Your name](https://github.com/your-username) | |
-| [Your name](https://github.com/your-username) *(optional)* | |
-| [Your name](https://github.com/your-username) *(optional)* | |
+| Karthikeyan | |
+| Sibu | |
+| Kimberly | |
+| Suraj | |
 
 ## Credits
 <Open-source libraries, APIs, datasets and assets you used.>
