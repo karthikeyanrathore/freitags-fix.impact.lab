@@ -5,7 +5,7 @@ We work spec-first: write or update a spec here, agree on it, then build against
 | Spec | What | Status |
 |---|---|---|
 | [001](001-broken-site-demo-video.md) | 30 s video of a customer hitting bugs on the mock pizza site | Done |
-| [002](002-self-healing-agent-demo.md) | Agent detects an outage, fixes it via git, sends the owner a digest | Draft |
+| [002](002-self-healing-agent-demo.md) | Agent detects an outage, fixes it via git, sends the owner a digest | Built, needs a live Claude run |
 
 ## How to use (people and Claude)
 1. `git pull`, then read the spec you're working on.

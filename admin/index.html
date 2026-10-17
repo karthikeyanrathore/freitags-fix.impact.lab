@@ -135,7 +135,7 @@ function set(id, html) { if (lastHtml[id] !== html) { $(id).innerHTML = html; la
 
 function stepsTable(check) {
   return `<div class="kv">${(check.steps || []).map(s =>
-    `<b>${s.ok ? "✅" : "❌"} ${esc(s.status ?? "")}</b><span>${esc(s.name)} · ${s.latency_ms} ms${s.error ? ` · <span style="color:var(--red)">${esc(s.error)}</span>` : ""}</span>`).join("")}</div>`;
+    `<b>${s.ok ? "✅" : "❌"} ${esc(s.status ?? (s.ok ? "" : "check"))}</b><span>${esc(s.name)} · ${s.latency_ms} ms${s.error ? ` · <span style="color:var(--red)">${esc(s.error)}</span>` : ""}</span>`).join("")}</div>`;
 }
 
 function eventBody(ev, key) {

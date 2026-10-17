@@ -17,14 +17,24 @@
 <What a user can do with it. A short list is fine.>
 
 ## How Claude is used
-<What Claude does inside the product: which model, what it reads, what it produces.>
+When the health check fails, a Claude agent (`claude-opus-5-5`, via the Anthropic API) gets the alert telemetry, errors reported from customers' browsers, recent git history, the site's cart code and the hosting vendor's API notes. It returns, as structured JSON, a diagnosis, the root cause, a code fix, a commit message, a risk note and a plain-language digest for the shop owner. The agent commits the fix to its own `fix/…` branch, re-runs the health check, and only switches the live site to the fix if it passes. If it fails, Claude gets a second try with the new test results. Prompts are in [`prompts/`](prompts/). The loop is in [`agent/`](agent/).
 
 ## How to run it
+Needs Python 3.9+, Node 18+ and git.
 ```bash
-cp .env.example .env    # paste your ANTHROPIC_API_KEY into .env
-# then the commands to start it, e.g.
-# python app.py   or   npm install && npm run dev   or   open index.html
+cp .env.example .env              # paste your ANTHROPIC_API_KEY into .env
+python3 -m venv .venv && .venv/bin/pip install anthropic
+.venv/bin/python server.py        # then open http://127.0.0.1:8000/admin
 ```
+With no API key the agent runs in **rehearsal mode**: the diagnosis is a canned answer (clearly labelled in the admin panel), and everything else is real (alert, git commit, re-test, deploy, digest).
+
+### Demo script (admin panel at `/admin`, the shop is at `/` and also embedded on the right)
+1. Add a pizza in the customer view: it works.
+2. Click **429 Too many requests** (or 503 / 504). Click Add in the shop: the customer sees an error, and it shows up under **Bug findings from customers**.
+3. Within ~8 s the monitor's health check fails and an **alert** appears (or click **Run health check now**). With **Autopilot** on, the agent launches by itself (or click **🤖 Launch agent**).
+4. Watch the **Agent run** timeline: alert → evidence → Claude's diagnosis → commit (open **Code change** to see the diff) → re-test PASS → deploy.
+5. The **Owner's inbox** gets the digest, and the customer view reloads on the fixed code. Add a pizza and check out: it works even though the vendor outage is still on.
+6. **Reset demo** puts the original code back live and turns the fault off. Fix branches stay in `git branch --list 'fix/*'` as history. Run with `PUSH_FIXES=1` to also push each fix branch to GitHub and link the commit in the digest.
 
 **Live link (if any):** <link>
 
@@ -42,4 +52,4 @@ Teams of 5 (at least 1 builder, 1 product or design, 1 domain expert; plus found
 | Suraj | |
 
 ## Credits
-<Open-source libraries, APIs, datasets and assets you used.>
+Anthropic API and Python SDK (MIT). Everything else is the Python and Node standard libraries. Playwright and FFmpeg were used for the demo video (see [`demo-video/`](demo-video/)).

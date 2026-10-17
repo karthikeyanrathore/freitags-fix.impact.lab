@@ -1,6 +1,6 @@
 # Spec 002 · Self-healing pizza site (agent loop demo)
 
-**Status:** Draft, needs team review · **Source:** [`demo-requirements.md`](../demo-requirements.md) · **Deadline:** feature freeze 15:00
+**Status:** Built (rehearsal mode verified; live Claude run needs an API key) · **Source:** [`demo-requirements.md`](../demo-requirements.md) · **Deadline:** feature freeze 15:00
 
 ## Audience and problem (one line each, for the README)
 - **Who:** small food business owners whose website is run by a third-party vendor.
@@ -32,22 +32,22 @@ As a pizza shop owner, I want my site's outages detected and fixed without me, a
 - `dashboard`: one HTML page that reads `runs/*.json` and shows the agent timeline + digest (this is the "artifact that demonstrates the failure pattern").
 
 ## Acceptance criteria
-- [ ] Fault switch reliably produces 429, 503 and 504.
-- [ ] Health check detects each within one run and records telemetry.
-- [ ] Agent produces a diagnosis and a code change that makes the check pass for at least one fault (429 is enough for the demo).
-- [ ] The fix shows up as a commit with a clear message in git history.
-- [ ] Digest is readable by a non-technical owner (no stack traces in the main text).
-- [ ] Whole loop runs end to end live in under 60 s.
+- [x] Fault switch reliably produces 429, 503 and 504.
+- [x] Health check detects each within one run and records telemetry.
+- [ ] Agent produces a diagnosis and a code change that makes the check pass for at least one fault. *(Verified with the rehearsal answer for 429/503/504. Still to run with a real API key.)*
+- [x] The fix shows up as a commit with a clear message in git history (`fix/<run-id>` branches).
+- [x] Digest is readable by a non-technical owner (no stack traces in the main text).
+- [ ] Whole loop runs end to end live in under 60 s. *(Rehearsal: ~4 s plus the ≤8 s monitor interval. Claude's time to be measured.)*
 
 ## Out of scope (cut first if behind)
 - Real vendor integration, real payments, multiple simultaneous faults, auto-merge to production without a passing check.
 
-## Open questions
-1. Deploy target for the demo: Vercel preview deploys, or run everything locally? (Local is safer for a live demo.)
-2. How is the agent triggered: manual "run" button, cron, or webhook from the health check?
-3. Digest channel: on-screen card only, or real email/Slack?
-4. What does the "fix" actually change for a 429: retry with backoff + idempotency key on add-to-cart, or a config/rate-limit change?
-5. Does `site/index.html` (existing) become the mock site, and who owns it?
+## Open questions (answered 17 Oct)
+1. Deploy target: **local**. One Python server (`server.py`) serves the shop, the vendor API and the admin panel. "Deploy" switches the live site to the fix branch's code.
+2. Trigger: **both**. A monitor runs the health check every 8 s and the agent auto-launches on an alert (Autopilot), plus a manual **Launch agent** button.
+3. Digest channel: **on-screen**, in an admin panel that shows the alert, the agent's timeline with full details (telemetry, diagnosis, diff, test results) and an email-style owner digest.
+4. The fix: the vendor's cart client (`site/cart-client.js`) gives up on the first error. Claude's fix retries 429/503/504 with backoff and sends an `Idempotency-Key` so a retried 504 never double-adds. The health check catches a retry without the key: 3 pizzas become 6.
+5. Yes: `site/index.html` is the shop. It now calls `site/cart-client.js` and reports customer errors to `/api/telemetry`.
 
 ## Tasks
 1. Agree answers to open questions (15 min).

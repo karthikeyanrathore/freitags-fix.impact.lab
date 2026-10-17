@@ -37,7 +37,7 @@ for (const itemId of [1, 2, 13]) {
 const cart = await (await fetch(`${base}/api/cart?cartId=${cartId}`)).json();
 const added = steps.filter(s => s.endpoint === "/api/cart/add" && s.ok).length;
 steps.push({ name: "cart has exactly one of each added item", endpoint: "/api/cart", ok: cart.count === added && added === 3,
-  status: 200, latency_ms: 0, error: cart.count === added && added === 3 ? null
+  status: null, latency_ms: 0, error: cart.count === added && added === 3 ? null
     : `expected 3 items, cart has ${cart.count} (${added} adds reported success)` });
 
 if (added) await step("checkout", "/api/checkout", () => checkout(base, cartId, "18:30"));
