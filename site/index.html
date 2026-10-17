@@ -45,6 +45,41 @@
   .msg.err { color: var(--red); }
   .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--dark); color: #fff; padding: 12px 18px; border-radius: 10px; font-weight: 600; z-index: 30; max-width: 90%; display: none; }
   .toast.err { background: var(--red); }
+  /* pizza builder */
+  .item .btns { display: flex; gap: 6px; }
+  .custom { background: #fff; color: var(--red); border: 2px solid var(--red); border-radius: 8px; padding: 6px 10px; cursor: pointer; font-weight: 600; }
+  .scrim { position: fixed; inset: 0; background: rgba(43,29,20,.45); display: none; align-items: center; justify-content: center; z-index: 25; padding: 16px; }
+  .scrim.open { display: flex; }
+  .builder { background: #fff; border-radius: 20px; display: flex; width: min(960px, 100%); max-height: 100%; overflow: auto; box-shadow: 0 30px 80px rgba(0,0,0,.3); }
+  .builder .left { flex: 0 0 380px; background: #fbf1df; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 28px; }
+  .pie { position: relative; width: 260px; height: 260px; border-radius: 50%; background: radial-gradient(circle, #d8452f 0 104px, #e8b169 105px 130px); }
+  .pie .cheese { position: absolute; border-radius: 50%; background: #fff3d4; }
+  .pie .tp { position: absolute; font-size: 26px; transform: translate(-50%, -50%) scale(0); transition: transform .25s; }
+  .pie .tp.on { transform: translate(-50%, -50%) scale(1); }
+  .pie .tp.pend { transform: translate(-50%, -50%) scale(1); opacity: .35; }
+  .left .pname { margin-top: 16px; font-weight: 700; font-size: 1.1rem; }
+  .left .psub { color: var(--muted); font-size: .85rem; margin-top: 4px; text-align: center; }
+  .builder .right { flex: 1; padding: 24px 28px; position: relative; min-width: 0; }
+  .builder h2 { margin: 0 0 4px; font-size: 1.6rem; padding-right: 150px; }
+  .saved { position: absolute; right: 56px; top: 30px; font-size: .85rem; font-weight: 600; color: var(--green); }
+  .saved.busy { color: var(--muted); } .saved.bad { color: #9a6b00; }
+  .x { position: absolute; right: 18px; top: 22px; border: 0; background: var(--cream); border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 1rem; }
+  .lbl { font-size: .75rem; letter-spacing: 1.5px; color: var(--muted); font-weight: 700; margin: 18px 0 8px; }
+  .seg { display: flex; gap: 8px; }
+  .seg button { flex: 1; border: 2px solid var(--line); background: #fff; border-radius: 10px; padding: 8px 0; font-weight: 600; cursor: pointer; font-size: .95rem; }
+  .seg button small { display: block; font-weight: 400; color: var(--muted); font-size: .75rem; }
+  .seg button.on { border-color: var(--red); background: #fdecea; color: var(--red); }
+  .chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .chip { border: 2px solid var(--line); background: #fff; border-radius: 12px; padding: 9px 10px; font-weight: 600; font-size: .9rem; display: flex; align-items: center; gap: 6px; cursor: pointer; text-align: left; }
+  .chip .e { font-size: 1.2rem; } .chip small { margin-left: auto; font-weight: 400; color: var(--muted); font-size: .75rem; }
+  .chip.on { background: var(--red); border-color: var(--red); color: #fff; } .chip.on small { color: #fbd4da; }
+  .chip.pend { border-style: dashed; border-color: var(--amber); background: #fff8e6; }
+  .bfoot { display: flex; align-items: center; justify-content: space-between; margin-top: 22px; }
+  .bfoot .tot { color: var(--muted); font-size: .85rem; } .bfoot .tot b { display: block; color: var(--dark); font-size: 1.5rem; }
+  .bfoot .order { background: var(--red); color: #fff; border: 0; border-radius: 12px; padding: 13px 22px; font-weight: 700; font-size: 1rem; cursor: pointer; }
+  .bfoot .order:disabled { opacity: .6; cursor: wait; }
+  .cart li small { display: block; color: var(--muted); font-size: .8rem; }
+  @media (max-width: 760px) { .builder { flex-direction: column; } .builder .left { flex: none; } .chips { grid-template-columns: repeat(2, 1fr); } .builder h2 { padding-right: 40px; } .saved { position: static; display: block; margin-bottom: 4px; } }
   footer { text-align: center; color: var(--muted); padding: 20px 16px; font-size: .85rem; }
 </style>
 </head>
@@ -80,12 +115,32 @@
   <div class="msg" id="orderMsg"></div>
 </aside>
 
+<div class="scrim" id="builder"><div class="builder" role="dialog" aria-label="Build your pizza">
+  <div class="left">
+    <div class="pie" id="pie">
+      <div class="cheese" style="left:62px;top:70px;width:42px;height:36px"></div><div class="cheese" style="left:150px;top:62px;width:46px;height:40px"></div>
+      <div class="cheese" style="left:98px;top:148px;width:52px;height:44px"></div><div class="cheese" style="left:176px;top:152px;width:36px;height:32px"></div>
+    </div>
+    <div class="pname" id="bName">Your pizza</div><div class="psub" id="bSub"></div>
+  </div>
+  <div class="right">
+    <h2 id="bTitle">Build your pizza</h2>
+    <div class="saved" id="bSaved"></div>
+    <button class="x" id="bClose" aria-label="Close">✕</button>
+    <div class="lbl">SIZE</div>
+    <div class="seg" id="bSizes"></div>
+    <div class="lbl">TOPPINGS · €1.20 EACH</div>
+    <div class="chips" id="bToppings"></div>
+    <div class="bfoot"><div class="tot">Your pizza<b id="bPrice">€0.00</b></div><button class="order" id="bAdd">Add to order</button></div>
+  </div>
+</div></div>
+
 <div class="toast" id="toast"></div>
 
 <footer>Demo site with sample data · Claude Impact Lab Berlin 2026</footer>
 
 <script type="module">
-import { addToCart, checkout } from "./cart-client.js";
+import { addToCart, checkout, saveOption } from "./cart-client.js";
 
 const API = location.origin;
 const cartId = sessionStorage.cartId || (sessionStorage.cartId = "web-" + Math.random().toString(36).slice(2, 10));
@@ -156,7 +211,7 @@ function renderMenu() {
       <p>${m.desc}</p>
       <div class="row">
         <span class="price">€${m.price.toFixed(2)}</span>
-        <button class="add" data-id="${m.id}">Add</button>
+        <span class="btns">${m.cat === "pizza" ? `<button class="custom" data-custom="${m.id}">Customize</button>` : ""}<button class="add" data-id="${m.id}">Add</button></span>
       </div>
     </div>`).join("");
 }
@@ -165,9 +220,10 @@ function renderCart() {
   const ids = Object.keys(cart);
   let total = 0, count = 0;
   document.getElementById("cartItems").innerHTML = ids.map(id => {
-    const m = MENU.find(x => x.id == id), q = cart[id];
-    total += m.price * q; count += q;
-    return `<li><span>${q}× ${m.name}</span><span>€${(m.price * q).toFixed(2)}</span></li>`;
+    const line = describeLine(id), q = cart[id];
+    if (!line) return "";
+    total += line.price * q; count += q;
+    return `<li><span>${q}× ${line.name}${line.detail ? `<small>${line.detail}</small>` : ""}</span><span>€${(line.price * q).toFixed(2)}</span></li>`;
   }).join("") || "<li>Nothing yet. Add something tasty!</li>";
   document.getElementById("cartTotal").textContent = "€" + total.toFixed(2);
   document.getElementById("cartCount").textContent = count;
@@ -193,7 +249,117 @@ document.getElementById("filters").addEventListener("click", e => {
   document.querySelectorAll("#filters button").forEach(b => b.classList.toggle("active", b === e.target));
   renderMenu();
 });
+
+// ---------- pizza builder: size + toppings, each choice saved to the order ----------
+const SIZES = [{ k: "S", name: "Small", cm: "26 cm", delta: 0 }, { k: "M", name: "Medium", cm: "30 cm", delta: 0 }, { k: "L", name: "Large", cm: "36 cm", delta: 3 }];
+const TOPPINGS = [
+  { k: "mushrooms", name: "Mushrooms", e: "🍄" }, { k: "olives", name: "Olives", e: "🫒" }, { k: "rocket", name: "Rocket", e: "🌿" },
+  { k: "chili", name: "Chili", e: "🌶️" }, { k: "burrata", name: "Burrata", e: "🧀" }, { k: "onion", name: "Red onion", e: "🧅" }];
+const TOPPING_PRICE = 1.2;
+const SPOTS = [[85,95],[175,108],[128,182],[196,172],[70,158],[136,80],[100,130],[184,140],[150,215],[60,120],[118,55],[210,95],[160,150],[95,205],[225,135],
+               [130,120],[170,65],[78,190],[205,200],[112,95],[145,240],[48,140],[190,230],[230,170],[70,80],[165,190],[120,160],[200,120],[90,235],[140,40]];
+document.getElementById("pie").insertAdjacentHTML("beforeend", TOPPINGS.map((t, ti) =>
+  [0,1,2,3,4].map(i => { const [x, y] = SPOTS[ti * 5 + i]; return `<span class="tp" data-k="${t.k}" style="left:${x}px;top:${y}px">${t.e}</span>`; }).join("")).join(""));
+
+// Cart line keys: "7" for a menu item, "1|L|mushrooms,olives" for a customized pizza
+function describeLine(key) {
+  const [id, size, tops] = String(key).split("|");
+  const m = MENU.find(x => x.id == id);
+  if (!m) return null;
+  if (!size) return { name: m.name, price: m.price, detail: "" };
+  const sz = SIZES.find(s => s.k === size) || SIZES[1];
+  const list = (tops || "").split(",").filter(Boolean);
+  const names = list.map(k => (TOPPINGS.find(t => t.k === k) || { name: k }).name.toLowerCase());
+  return { name: `${m.name} · ${sz.name}`, price: m.price + sz.delta + list.length * TOPPING_PRICE,
+           detail: names.length ? names.join(", ").replace(/^./, c => c.toUpperCase()) : "No extra toppings" };
+}
+const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+let draft = null;   // { lineId, itemId, size, toppings: [], pending: Set, state: "idle"|"saving"|"saved"|"error" }
+
+function openBuilder(itemId) {
+  draft = { lineId: newId(), itemId, size: "M", toppings: [], pending: new Set(), state: "idle" };
+  document.getElementById("builder").classList.add("open");
+  renderBuilder();
+}
+function closeBuilder() { document.getElementById("builder").classList.remove("open"); draft = null; }
+
+function renderBuilder() {
+  if (!draft) return;
+  const m = MENU.find(x => x.id == draft.itemId);
+  const key = lineKey();
+  const line = describeLine(key);
+  document.getElementById("bTitle").textContent = `Build your ${m.name}`;
+  document.getElementById("bName").textContent = `Your ${m.name}`;
+  document.getElementById("bSub").textContent = line.detail === "No extra toppings" ? SIZES.find(s => s.k === draft.size).name : `${SIZES.find(s => s.k === draft.size).name} · ${line.detail.toLowerCase()}`;
+  document.getElementById("bSizes").innerHTML = SIZES.map(s =>
+    `<button data-size="${s.k}" class="${s.k === draft.size ? "on" : ""}">${s.name}<small>${s.cm}${s.delta ? ` · +€${s.delta.toFixed(2)}` : ""}</small></button>`).join("");
+  document.getElementById("bToppings").innerHTML = TOPPINGS.map(t => {
+    const pend = draft.pending.has(t.k), on = draft.toppings.includes(t.k) && !pend;
+    return `<button class="chip ${on ? "on" : ""} ${pend ? "pend" : ""}" data-top="${t.k}"><span class="e">${t.e}</span>${t.name}<small>${pend ? "not saved" : "+1.20"}</small></button>`;
+  }).join("");
+  document.querySelectorAll("#pie .tp").forEach(el => {
+    const k = el.dataset.k;
+    el.classList.toggle("on", draft.toppings.includes(k) && !draft.pending.has(k));
+    el.classList.toggle("pend", draft.pending.has(k));
+  });
+  const sv = document.getElementById("bSaved");
+  sv.className = "saved" + (draft.state === "saving" ? " busy" : draft.state === "error" ? " bad" : "");
+  sv.textContent = { idle: "", saving: "Saving…", saved: "Saved to your order ✓",
+    error: `Waiting to save ${[...draft.pending].map(k => TOPPINGS.find(t => t.k === k).name.toLowerCase()).join(", ") || "your choice"}` }[draft.state];
+  document.getElementById("bPrice").textContent = "€" + line.price.toFixed(2);
+  document.getElementById("bAdd").textContent = `Add to order · €${line.price.toFixed(2)}`;
+}
+function lineKey() { return `${draft.itemId}|${draft.size}|${draft.toppings.filter(k => !draft.pending.has(k)).join(",")}`; }
+
+// Save the current choices; `changed` is the topping that triggered it (marked "not saved" on failure)
+async function saveDraft(changed) {
+  const d = draft;
+  d.state = "saving"; renderBuilder();
+  try {
+    await saveOption(API, cartId, d.lineId, { itemId: d.itemId, size: d.size, toppings: d.toppings });
+    d.pending.clear(); d.state = "saved";
+  } catch (err) {
+    if (changed && d.toppings.includes(changed)) d.pending.add(changed);
+    d.state = "error";
+    toast(`Sorry, we couldn't save that (error ${err.status ?? "network"}). Please try again.`, true);
+    reportError("save topping", err);
+  }
+  if (draft === d) renderBuilder();
+}
+
+document.getElementById("bSizes").addEventListener("click", e => {
+  const b = e.target.closest("[data-size]"); if (!b || !draft) return;
+  draft.size = b.dataset.size; saveDraft(null);
+});
+document.getElementById("bToppings").addEventListener("click", e => {
+  const b = e.target.closest("[data-top]"); if (!b || !draft || draft.state === "saving") return;
+  const k = b.dataset.top;
+  if (draft.pending.has(k)) return saveDraft(k);              // tap a "not saved" topping to retry
+  draft.toppings = draft.toppings.includes(k) ? draft.toppings.filter(x => x !== k) : [...draft.toppings, k];
+  saveDraft(draft.toppings.includes(k) ? k : null);
+});
+document.getElementById("bClose").onclick = closeBuilder;
+document.getElementById("builder").addEventListener("click", e => { if (e.target.id === "builder") closeBuilder(); });
+document.getElementById("bAdd").onclick = async () => {
+  if (!draft) return;
+  const btn = document.getElementById("bAdd"), key = lineKey(), line = describeLine(key);
+  btn.disabled = true; btn.textContent = "Adding…";
+  try {
+    const res = await addToCart(API, cartId, key);
+    for (const k in cart) delete cart[k];
+    Object.assign(cart, res.cart);
+    renderCart(); closeBuilder();
+    toast(`🍕 ${line.name} added to your order`);
+  } catch (err) {
+    toast(`Sorry, we couldn't add that (error ${err.status ?? "network"}). Please try again.`, true);
+    reportError("add to cart", err);
+  } finally {
+    btn.disabled = false; if (draft) renderBuilder();
+  }
+};
+
 document.getElementById("menu").addEventListener("click", async e => {
+  if (e.target.dataset.custom) return openBuilder(Number(e.target.dataset.custom));
   const btn = e.target, id = btn.dataset.id;
   if (!id || btn.disabled) return;
   btn.disabled = true; btn.textContent = "Adding…";

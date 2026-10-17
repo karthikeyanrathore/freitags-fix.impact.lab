@@ -25,6 +25,12 @@ export function addToCart(baseUrl, cartId, itemId) {
   return post(baseUrl, "/api/cart/add", { cartId, itemId });
 }
 
+// Saves the customer's choices (size, toppings) for a pizza they are building.
+// options: { itemId, size, toppings: [..] }. Resolves to { lineId, options }.
+export function saveOption(baseUrl, cartId, lineId, options) {
+  return post(baseUrl, "/api/cart/option", { cartId, lineId, options });
+}
+
 // Places the order. Resolves to { orderId, slot }.
 export function checkout(baseUrl, cartId, slot) {
   return post(baseUrl, "/api/checkout", { cartId, slot });

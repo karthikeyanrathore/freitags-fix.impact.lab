@@ -47,6 +47,14 @@ def apply_checkout(body):
     return {"orderId": f"FP-{1000 + n}", "slot": body.get("slot")}
 
 
+def apply_option(body):
+    """Store the customer's in-progress choices for one pizza (size, toppings)."""
+    line = str(body.get("lineId"))[:64]
+    options = body.get("options") or {}
+    R.set(f"draft:{body.get('cartId')}:{line}", json.dumps(options), ex=IDEM_TTL)
+    return {"lineId": line, "options": options}
+
+
 def apply_once(key, apply, body):
     """Apply at most once per Idempotency-Key; returns the stored result on repeats."""
     if key:
@@ -121,6 +129,8 @@ class Handler(BaseHTTPRequestHandler):
             return self.vendor_post(apply_add, body)
         if path == "/api/checkout":
             return self.vendor_post(apply_checkout, body)
+        if path == "/api/cart/option":
+            return self.vendor_post(apply_option, body)
         if path == "/api/telemetry":  # errors seen by real customers' browsers
             finding = {"ts": now(), "source": "customer browser", "endpoint": str(body.get("endpoint"))[:80],
                        "status": body.get("status"), "action": str(body.get("action"))[:80],

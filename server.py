@@ -85,6 +85,13 @@ def apply_add(body):
         return {"cart": dict(cart), "count": sum(cart.values())}
 
 
+def apply_option(body):
+    with lock:
+        line = str(body.get("lineId"))[:64]
+        S.setdefault("drafts", {})[f"{body.get('cartId')}:{line}"] = body.get("options") or {}
+        return {"lineId": line, "options": body.get("options") or {}}
+
+
 def apply_checkout(body):
     with lock:
         cart = S["carts"].get(str(body.get("cartId"))) or {}
@@ -330,6 +337,8 @@ class Handler(BaseHTTPRequestHandler):
             return vendor_post(self, apply_add, body)
         if path == "/api/checkout":
             return vendor_post(self, apply_checkout, body)
+        if path == "/api/cart/option":
+            return vendor_post(self, apply_option, body)
         if path == "/api/telemetry":  # errors seen by real customers' browsers
             finding = {"ts": now(), "source": "customer browser", "endpoint": str(body.get("endpoint"))[:80],
                        "status": body.get("status"), "action": str(body.get("action"))[:80],

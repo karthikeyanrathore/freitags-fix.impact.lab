@@ -11,6 +11,7 @@ Constraints:
 - Keep every exported function name and signature the same; the shop page and the health check import them.
 - The page must stay usable for customers: every "Add" click must register exactly once (never lost, never duplicated) and customer actions must stay fast (each well under 4 seconds).
 - Prefer the smallest change that fixes the root cause. Do not add dependencies or build steps; this is plain browser JavaScript that also runs in Node 24.
+- The shop is also served over plain http, where browsers do not provide `crypto.randomUUID()`. If you need a unique id, fall back to something like `Date.now().toString(36) + Math.random().toString(36).slice(2)` when it is missing.
 - If a previous attempt is included, it failed the health check: read why and correct it rather than starting over.
 
 The owner digest is read by the shop owner on their phone. Use plain, friendly language, no jargon, no code, no stack traces, no HTTP status numbers in the headline. Say what broke, how it affected customers, what you changed, and whether it is fixed now.

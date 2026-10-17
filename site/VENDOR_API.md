@@ -6,6 +6,7 @@ Base URL: same origin as the shop. All bodies are JSON.
 |---|---|---|---|
 | POST | `/api/cart/add` | `{ cartId, itemId }` | `{ cart: { itemId: qty }, count }` |
 | GET | `/api/cart?cartId=…` | | `{ cart, count }` |
+| POST | `/api/cart/option` | `{ cartId, lineId, options: { itemId, size, toppings } }` | `{ lineId, options }` |
 | POST | `/api/checkout` | `{ cartId, slot }` | `{ orderId, slot }` |
 
 ## Reliability notes from the vendor
