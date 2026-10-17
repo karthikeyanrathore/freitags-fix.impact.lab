@@ -1,0 +1,369 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Crust demo</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1280px;height:720px;overflow:hidden;background:#111;font-family:"DejaVu Sans",sans-serif;color:#2b2420}
+#stage{position:relative;width:1280px;height:720px;overflow:hidden;background:#fbf4e8}
+.chrome{height:52px;background:#e9e6e1;border-bottom:1px solid #cfcac2;display:flex;align-items:center;gap:16px;padding:0 18px}
+.dots span{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px}
+.navbtns{color:#888;font-size:18px;letter-spacing:10px}
+.url{flex:1;height:32px;background:#fff;border-radius:16px;display:flex;align-items:center;padding:0 16px;font-size:14px;color:#333}
+.url .lock{color:#1a7f37;margin-right:8px;font-size:12px}
+#loadbar{position:absolute;top:50px;left:0;height:3px;background:#c8371d;width:0}
+.site{position:absolute;top:53px;left:0;right:0;bottom:0;overflow:hidden}
+header{height:72px;display:flex;align-items:center;padding:0 48px;border-bottom:2px solid #ead9bd;background:#fbf4e8;position:relative;z-index:2}
+.logo{font-family:"DejaVu Serif";font-weight:bold;font-size:28px;color:#c8371d;letter-spacing:-.5px}
+.logo small{color:#7a6a5c;font-size:12px;font-family:"DejaVu Sans";font-weight:normal;letter-spacing:2px;margin-left:10px}
+nav{margin-left:auto;display:flex;gap:30px;font-size:16px;align-items:center}
+nav span{padding:6px 2px}
+nav .active{border-bottom:2px solid #c8371d}
+#nav-cart{background:#2b2420;color:#fbf4e8;padding:8px 16px;border-radius:20px}
+#badge{display:inline-block;min-width:22px;background:#c8371d;color:#fff;border-radius:11px;font-size:13px;text-align:center;margin-left:6px;padding:1px 6px}
+.page{position:absolute;top:72px;left:0;right:0;bottom:0;display:none}
+.flag{outline:3px dashed #ff3b30;outline-offset:5px}
+/* home */
+#promo{background:#c8371d;color:#fff;font-size:14px;letter-spacing:1.5px;height:36px;line-height:36px;white-space:nowrap;overflow:hidden;padding-left:48px}
+.promo-txt{display:inline-block}
+.hero{display:flex;gap:56px;padding:56px 48px}
+.hero-l{width:560px}
+.hero h1{font-family:"DejaVu Serif";font-size:52px;line-height:1.12;letter-spacing:-1px}
+.hero h1 em{color:#c8371d}
+.hero p{margin:22px 0 30px;font-size:18px;color:#6b5d50}
+.btn{display:inline-block;background:#c8371d;color:#fff;border-radius:28px;padding:14px 28px;font-size:16px;font-weight:bold}
+#heroimg{width:560px;height:360px;border:2px dashed #b9a88f;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:#8a7a68;font-size:14px;background:#f3e9d7}
+#heroimg .code{font-family:"DejaVu Sans Mono";font-size:13px;background:#e6d8bf;padding:4px 10px;border-radius:6px}
+/* menu */
+.mhead{padding:26px 48px 18px;display:flex;align-items:baseline;gap:18px}
+.mhead h2{font-family:"DejaVu Serif";font-size:34px}
+.mhead span{color:#7a6a5c}
+.grid{display:flex;flex-wrap:wrap;gap:24px;padding:0 48px}
+.card{width:270px;background:#fff;border-radius:16px;padding:16px 18px 18px;box-shadow:0 2px 0 #ead9bd}
+.card.special{background:#2b2420;color:#fbf4e8;box-shadow:0 0 0 3px #e2b064}
+.card .tag{display:inline-block;background:#e2b064;color:#2b2420;font-size:11px;font-weight:bold;padding:2px 8px;border-radius:8px;letter-spacing:1px}
+.pz{width:140px;height:140px;border-radius:50%;margin:8px auto 12px}
+.pz.marg{background:radial-gradient(circle at 34% 36%,#fff4d6 0 10px,transparent 11px),radial-gradient(circle at 63% 55%,#fff4d6 0 12px,transparent 13px),radial-gradient(circle at 42% 68%,#fff4d6 0 9px,transparent 10px),radial-gradient(circle at 60% 30%,#3f7d2c 0 6px,transparent 7px),radial-gradient(circle at 30% 56%,#3f7d2c 0 5px,transparent 6px),radial-gradient(circle,#c8371d 0 56px,#e2b064 57px 70px)}
+.pz.pep{background:radial-gradient(circle at 35% 35%,#8f2210 0 11px,transparent 12px),radial-gradient(circle at 64% 40%,#8f2210 0 11px,transparent 12px),radial-gradient(circle at 48% 64%,#8f2210 0 11px,transparent 12px),radial-gradient(circle at 70% 66%,#8f2210 0 9px,transparent 10px),radial-gradient(circle,#e7a640 0 56px,#d9a35b 57px 70px)}
+.pz.tpl{border:2px dashed #c9bba6;border-radius:12px;width:220px;display:flex;align-items:center;justify-content:center;font-family:"DejaVu Sans Mono";font-size:12px;color:#9a8b78;background:#faf6ee}
+.pz.qf{background:radial-gradient(circle at 36% 38%,#fff 0 12px,transparent 13px),radial-gradient(circle at 62% 60%,#f5d27a 0 13px,transparent 14px),radial-gradient(circle at 60% 34%,#dfe7c9 0 9px,transparent 10px),radial-gradient(circle,#f3c95c 0 56px,#d9a35b 57px 70px)}
+.pz.tr{background:radial-gradient(circle at 38% 38%,#3b2c22 0 8px,transparent 9px),radial-gradient(circle at 62% 46%,#3b2c22 0 7px,transparent 8px),radial-gradient(circle at 46% 66%,#3b2c22 0 9px,transparent 10px),radial-gradient(circle,#efe2c4 0 56px,#d9a35b 57px 70px)}
+.card h3{font-size:19px;margin-bottom:6px}
+.card h3.mono{font-family:"DejaVu Sans Mono";font-size:16px;color:#7a6a5c;font-weight:normal}
+.card .desc{font-size:13px;color:#7a6a5c;height:36px;line-height:18px}
+.card.special .desc{color:#cbbda9}
+.card .row{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
+.price{font-size:19px;font-weight:bold}
+.add{background:#c8371d;color:#fff;border-radius:20px;padding:9px 16px;font-size:14px;font-weight:bold}
+.card.special .add{background:#e2b064;color:#2b2420}
+.add.busy{opacity:.55}
+#toast{position:absolute;right:28px;top:142px;background:#2b2420;color:#fbf4e8;padding:14px 20px;border-radius:12px;font-size:15px;display:none;z-index:5;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+#toast b{color:#e2b064}
+/* cart */
+.cart-wrap{display:flex;gap:40px;padding:8px 48px}
+.items{width:690px}
+.item{display:flex;align-items:center;gap:18px;background:#fff;border-radius:14px;padding:14px 18px;margin-bottom:14px}
+.item .pz{width:64px;height:64px;margin:0;background-size:100% 100%}
+.item .nm{flex:1;font-size:18px;font-weight:bold}
+.item .nm small{display:block;font-weight:normal;font-size:13px;color:#7a6a5c;margin-top:3px}
+.item .qty{font-size:15px;color:#7a6a5c;width:60px}
+.item .p{font-size:18px;font-weight:bold;width:90px;text-align:right}
+.coupon{display:flex;gap:10px;margin-top:8px}
+#coupon{width:260px;height:46px;border:2px solid #d8c8ad;border-radius:10px;background:#fff;font-family:"DejaVu Sans Mono";font-size:16px;padding:0 14px;line-height:42px;color:#2b2420}
+#coupon.ph{color:#b3a48f}
+#coupon .caret{display:inline-block;width:2px;height:20px;background:#2b2420;vertical-align:middle;margin-left:1px}
+#apply{height:46px;line-height:46px;padding:0 22px;border-radius:10px;background:#2b2420;color:#fff;font-weight:bold}
+.summary{width:410px;background:#fff;border-radius:16px;padding:24px 26px}
+.summary h4{font-size:18px;margin-bottom:16px}
+.sline{display:flex;justify-content:space-between;font-size:16px;margin:10px 0;color:#5c4f43}
+.sline.disc{color:#1a7f37}
+.sline.total{border-top:2px solid #ead9bd;padding-top:14px;margin-top:16px;font-size:22px;font-weight:bold;color:#2b2420}
+#total.neg{color:#d0021b}
+#checkout{display:block;text-align:center;margin-top:22px;background:#c8371d;color:#fff;border-radius:28px;padding:16px;font-size:17px;font-weight:bold}
+/* modals */
+.scrim{position:absolute;inset:53px 0 0 0;background:rgba(30,22,16,.55);display:none;align-items:center;justify-content:center;z-index:8}
+.modal{background:#fff;border-radius:18px;padding:30px 34px;width:520px}
+.pbar{height:10px;background:#efe4d2;border-radius:5px;overflow:hidden;margin:18px 0 10px}
+.pbar i{display:block;height:100%;background:#c8371d}
+.err{width:640px}
+.err .code{font-family:"DejaVu Sans Mono";color:#d0021b;font-size:14px;letter-spacing:2px}
+.err h3{font-family:"DejaVu Serif";font-size:32px;margin:8px 0 12px}
+.err pre{background:#1e1a17;color:#f2c0b4;font-family:"DejaVu Sans Mono";font-size:12.5px;line-height:1.55;padding:14px 16px;border-radius:10px;white-space:pre-wrap}
+.err .acts{margin-top:18px;display:flex;gap:12px}
+#retry{background:#2b2420;color:#fff;border-radius:22px;padding:11px 22px;font-weight:bold;font-size:15px}
+.ghost{border:2px solid #d8c8ad;border-radius:22px;padding:9px 20px;font-size:15px;color:#7a6a5c}
+/* overlays */
+.over{position:absolute;inset:0;background:#17120f;color:#fbf4e8;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:20;opacity:0}
+.over .logo{font-size:64px}
+.over .sub{margin-top:16px;font-size:20px;color:#cbbda9;letter-spacing:1px}
+.over .rec{margin-top:34px;font-size:14px;color:#8d7f71;letter-spacing:3px}
+.over .rec i{display:inline-block;width:10px;height:10px;border-radius:50%;background:#ff3b30;margin-right:10px}
+.endh{font-family:"DejaVu Serif";font-size:52px;letter-spacing:-1px}
+.endh em{color:#e2b064;font-style:normal}
+.blist{margin-top:34px;display:grid;grid-template-columns:1fr 1fr;gap:12px 48px;font-size:16px;color:#d9ccb9}
+.blist div b{display:inline-block;background:#c8371d;color:#fff;font-size:12px;border-radius:6px;padding:2px 8px;margin-right:10px}
+#caption{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);background:rgba(23,18,15,.92);color:#fff;font-size:18px;padding:12px 22px 12px 14px;border-radius:30px;z-index:15;white-space:nowrap;opacity:0;box-shadow:0 8px 30px rgba(0,0,0,.3)}
+#caption b{background:#ff3b30;border-radius:16px;padding:3px 12px;font-size:14px;margin-right:12px;letter-spacing:1px}
+#cursor{position:absolute;left:0;top:0;z-index:30;width:26px;height:34px}
+#ripple{position:absolute;z-index:29;border:3px solid #ff3b30;border-radius:50%;opacity:0}
+</style></head>
+<body><div id="stage">
+  <div class="chrome">
+    <div class="dots"><span style="background:#ff5f57"></span><span style="background:#febc2e"></span><span style="background:#28c840"></span></div>
+    <div class="navbtns">‹ › ↻</div>
+    <div class="url"><span class="lock">●</span><span id="url">crustandco.example</span></div>
+  </div>
+  <div id="loadbar"></div>
+  <div class="site">
+    <header>
+      <div class="logo">Crust &amp; Co.<small>WOOD-FIRED PIZZA</small></div>
+      <nav><span id="nav-home">Home</span><span id="nav-menu">Menu</span><span>Deals</span><span id="nav-cart">Cart<span id="badge">0</span></span></nav>
+    </header>
+
+    <div class="page" id="p-home">
+      <div id="promo"><span class="promo-txt">FREE DELIVERY ON ORDERS OVER $undefined &nbsp;·&nbsp; FREE DELIVERY ON ORDERS OVER $undefined &nbsp;·&nbsp; FREE DELIVERY ON ORDERS OVER $undefined</span></div>
+      <div class="hero">
+        <div class="hero-l">
+          <h1>Wood-fired.<br>Hand-stretched.<br><em>Usually delivered.</em></h1>
+          <p>Neighbourhood pizza, baked at 450 °C and at your door in 30 minutes.</p>
+          <span class="btn">Order now →</span>
+        </div>
+        <div id="heroimg">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#a8977f" stroke-width="1.6"><path d="M3 5h18v14H3z"/><path d="M3 15l5-5 4 4 3-3 6 6"/><path d="M14 3l-3 7 3 2-2 9" stroke="#fbf4e8" stroke-width="2.4"/></svg>
+          <span class="code">GET /img/hero-pizza-FINAL-v3.jpg → 404</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="p-menu">
+      <div id="banner" style="display:none"></div>
+      <div class="mhead"><h2>Our menu</h2><span>12-inch, sourdough base</span></div>
+      <div class="grid">
+        <div class="card special" id="m-card-t" style="display:none">
+          <span class="tag">NEW · SPONSORED</span>
+          <div class="pz tr" style="width:116px;height:116px"></div>
+          <h3>Truffle Supreme</h3><div class="desc">Black truffle, fior di latte, wild mushrooms.</div>
+          <div class="row"><span class="price">$24.90</span><span class="add" id="m-btn-t">Add to cart</span></div>
+        </div>
+        <div class="card" id="m-card-0">
+          <div class="pz marg"></div>
+          <h3>Margherita</h3><div class="desc">San Marzano tomato, mozzarella, basil.</div>
+          <div class="row"><span class="price">$12.90</span><span class="add" id="m-btn-0">Add to cart</span></div>
+        </div>
+        <div class="card" id="m-card-1">
+          <div class="pz pep"></div>
+          <h3>Pepperoni</h3><div class="desc">Spicy salami, mozzarella, chili honey.</div>
+          <div class="row"><span class="price" id="m-price-1">$NaN</span><span class="add">Add to cart</span></div>
+        </div>
+        <div class="card" id="m-card-2">
+          <div class="pz tpl">{{ pizza.image_url }}</div>
+          <h3 class="mono" id="m-name-2">{{ pizza.name }}</h3><div class="desc" style="font-family:'DejaVu Sans Mono';font-size:12px">{{ pizza.description | truncate(40) }}</div>
+          <div class="row"><span class="price">$14.50</span><span class="add">Add to cart</span></div>
+        </div>
+        <div class="card" id="m-card-3">
+          <div class="pz qf"></div>
+          <h3>Quattro Formaggi</h3><div class="desc">Mozzarella, gorgonzola, taleggio, parmesan.</div>
+          <div class="row"><span class="price">$15.90</span><span class="add">Add to cart</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="p-cart">
+      <div class="mhead"><h2>Your cart</h2><span>2 items</span></div>
+      <div class="cart-wrap">
+        <div class="items">
+          <div class="item"><div class="pz tr"></div><div class="nm">Truffle Supreme<small>Didn't mean to add this</small></div><div class="qty">× 1</div><div class="p">$24.90</div></div>
+          <div class="item"><div class="pz marg"></div><div class="nm">Margherita<small>Wanted one. Got three.</small></div><div class="qty">× 3</div><div class="p">$38.70</div></div>
+          <div class="coupon"><div id="coupon" class="ph">Coupon code</div><span id="apply">Apply</span></div>
+        </div>
+        <div class="summary">
+          <h4>Order summary</h4>
+          <div class="sline"><span>Subtotal</span><span>$63.60</span></div>
+          <div class="sline"><span>Delivery</span><span>$2.50</span></div>
+          <div class="sline disc" id="disc" style="display:none"><span>Coupon PIZZA10 (10%)</span><span>−$1,306.10</span></div>
+          <div class="sline total"><span>Total</span><span id="total">$66.10</span></div>
+          <span id="checkout">Checkout</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <div class="scrim" id="proc"><div class="modal">
+    <div style="font-size:20px;font-weight:bold">Processing payment…</div>
+    <div class="pbar"><i id="pfill"></i></div>
+    <div style="color:#7a6a5c;font-size:14px" id="ptext">0%</div>
+  </div></div>
+
+  <div class="scrim" id="errm"><div class="modal err">
+    <div class="code">HTTP 500 · INTERNAL SERVER ERROR</div>
+    <h3>Our oven crashed.</h3>
+<pre>TypeError: Cannot read properties of undefined (reading 'cheese')
+    at calculateToppings (checkout.js:212:31)
+    at submitOrder (checkout.js:88:12)
+    at async POST /api/orders</pre>
+    <div class="acts"><span id="retry">Try again</span><span class="ghost">Back to cart</span></div>
+  </div></div>
+
+  <div id="caption"><b id="cap-n">BUG 1</b><span id="cap-t"></span></div>
+
+  <div class="over" id="title">
+    <div class="logo">Crust &amp; Co.</div>
+    <div class="sub">Usability session · ordering a pizza</div>
+    <div class="rec"><i></i>SESSION REPLAY · 0:30</div>
+  </div>
+
+  <div class="over" id="end">
+    <div class="endh">6 bugs. 30 seconds. <em>0 pizzas.</em></div>
+    <div class="blist">
+      <div><b>1</b>Hero image 404, promo shows $undefined</div>
+      <div><b>4</b>Unrendered template, price is $NaN</div>
+      <div><b>2</b>Layout shift adds the wrong pizza</div>
+      <div><b>5</b>Coupon turns the total negative</div>
+      <div><b>3</b>Double-submit: cart jumps 1 → 4</div>
+      <div><b>6</b>Checkout throws a 500</div>
+    </div>
+    <div class="rec" style="margin-top:44px">crustandco.example · demo session</div>
+  </div>
+
+  <div id="ripple"></div>
+  <svg id="cursor" viewBox="0 0 26 34"><path d="M2 2 L2 27 L8.5 21 L13 31 L17 29.2 L12.6 19.6 L21.5 19.6 Z" fill="#111" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const fade=(t,a,b,f=0.25)=>clamp(Math.min((t-a)/f,(b-t)/f),0,1);
+const between=(t,a,b)=>t>=a&&t<b;
+const show=(sel,on,d='block')=>{$(sel).style.display=on?d:'none'};
+const flag=(sel,on)=>$(sel).classList.toggle('flag',on);
+
+const CLICKS=[7.6,10.2,11.8,12.5,13.0,18.6,20.3,22.3,23.8,27.0];
+const NAVS=[[7.6,8.0],[18.6,19.0],[23.8,24.3]];
+const CAPS=[
+ [3.4,7.9,1,'Hero image returns 404 · promo says "$undefined"'],
+ [8.4,11.8,2,'Layout shift: the click lands on a sponsored pizza'],
+ [11.8,15.6,3,'No loading guard: 3 clicks → cart jumps from 1 to 4'],
+ [15.6,18.7,4,'Raw template tags and a $NaN price ship to production'],
+ [19.4,23.8,5,'A 10% coupon makes the total −$1,240.00'],
+ [23.9,27.3,6,'Checkout hangs at 99%, then throws a 500'],
+];
+
+function applyState(t){
+  const page = t<8.0?'home': t<19.0?'menu':'cart';
+  show('#p-home',page==='home'); show('#p-menu',page==='menu'); show('#p-cart',page==='cart');
+  $('#nav-home').classList.toggle('active',page==='home');
+  $('#nav-menu').classList.toggle('active',page==='menu');
+  $('#url').textContent = t>=23.9?'crustandco.example/checkout': page==='home'?'crustandco.example': 'crustandco.example/'+page;
+  let lb=0; for(const [a,b] of NAVS){ if(t>=a&&t<b+0.25) lb = t<b? (t-a)/(b-a)*100 : 100; }
+  $('#loadbar').style.width=lb+'%'; $('#loadbar').style.opacity = lb>=100?0.4:1;
+
+  // promo marquee
+  $('.promo-txt').style.transform=`translateX(${-t*40}px)`;
+
+  // menu
+  show('#m-card-t', t>=10.1);
+  const busy = between(t,11.8,13.4);
+  $('#m-btn-0').textContent = busy?'Adding…':'Add to cart';
+  $('#m-btn-0').classList.toggle('busy',busy);
+  const count = t<10.2?0 : t<13.4?1 : 4;
+  $('#badge').textContent=count;
+
+  // toast
+  let toast=null;
+  if(between(t,10.3,12.0)) toast='<b>Truffle Supreme</b> added · $24.90';
+  else if(between(t,13.4,15.2)) toast='<b>Margherita × 3</b> added to cart';
+  show('#toast',!!toast); if(toast) $('#toast').innerHTML=toast;
+
+  // cart
+  const code='PIZZA10'; const n=clamp(Math.floor((t-20.5)/0.15)+1,0,code.length);
+  const focused = between(t,20.3,22.3);
+  const caretOn = focused && Math.floor(t*2.5)%2===0;
+  if(n===0 && !focused){ $('#coupon').className='ph'; $('#coupon').innerHTML='Coupon code'; }
+  else { $('#coupon').className=''; $('#coupon').innerHTML=code.slice(0,n)+(caretOn?'<span class="caret"></span>':''); }
+  $('#coupon').style.borderColor = focused?'#c8371d':'#d8c8ad';
+  const applied=t>=22.3;
+  show('#disc',applied,'flex');
+  $('#total').textContent = applied?'−$1,240.00':'$66.10';
+  $('#total').classList.toggle('neg',applied);
+  $('#checkout').textContent = t>=23.8?'Processing…':'Checkout';
+  $('#checkout').style.opacity = t>=23.8?0.6:1;
+
+  // modals
+  show('#proc', between(t,24.0,25.4),'flex');
+  const pct = Math.floor(clamp((t-24.0)/0.8,0,1)*99);
+  $('#pfill').style.width=pct+'%'; $('#ptext').textContent = pct>=99?'99% · still processing…':pct+'%';
+  show('#errm', t>=25.4,'flex');
+  const shake = between(t,27.0,27.35)? Math.sin((t-27.0)*60)*8 : 0;
+  $('#errm .modal').style.transform=`translateX(${shake}px)`;
+
+  // flags
+  flag('#promo', between(t,3.6,7.9)); flag('#heroimg', between(t,3.6,7.9));
+  flag('#m-card-t', between(t,10.3,11.8));
+  flag('#badge', between(t,13.4,15.6));
+  flag('#m-price-1', between(t,15.8,18.7)); flag('#m-name-2', between(t,15.8,18.7));
+  flag('#total', between(t,22.5,23.8));
+
+  // captions
+  let cap=null; for(const c of CAPS) if(between(t,c[0],c[1])) cap=c;
+  if(cap){ $('#cap-n').textContent='BUG '+cap[2]; $('#cap-t').textContent=cap[3]; $('#caption').style.opacity=fade(t,cap[0],cap[1]); }
+  else $('#caption').style.opacity=0;
+
+  // overlays
+  $('#title').style.opacity = t<2.6?1: clamp(1-(t-2.6)/0.4,0,1);
+  $('#title').style.display = t<3.0?'flex':'none';
+  $('#end').style.opacity = clamp((t-27.4)/0.4,0,1);
+  $('#end').style.display = t>=27.4?'flex':'none';
+}
+
+// cursor keyframes: [arrival time, target, measure-time]
+const K=[
+ [3.0,[980,620]],[3.4,'='],
+ [4.6,'.promo-txt',4.6,[-380,0]],[5.2,'='],
+ [6.2,'#heroimg'],[6.9,'='],
+ [7.5,'#nav-menu'],[7.8,'='],
+ [8.8,[720,470]],
+ [9.9,'#m-btn-0',9.9],[10.7,'='],
+ [11.6,'#m-btn-0',11.6],[13.7,'='],
+ [15.2,'#m-price-1',15.2],[15.9,'='],
+ [17.0,'#m-name-2',17.0],[17.6,'='],
+ [18.5,'#nav-cart'],[19.3,'='],
+ [20.2,'#coupon',20.2,[-60,0]],[21.7,'='],
+ [22.2,'#apply'],[22.9,'='],
+ [23.7,'#checkout'],[26.1,'='],
+ [26.8,'#retry'],[30.5,'='],
+];
+let KP=[];
+function init(){
+  const st=$('#stage').getBoundingClientRect();
+  let prev=null;
+  for(const k of K){
+    let p;
+    if(k[1]==='=') p=prev;
+    else if(Array.isArray(k[1])) p=k[1];
+    else { applyState(k[2]??k[0]); const r=$(k[1]).getBoundingClientRect(); const o=k[3]||[0,0];
+      p=[r.left-st.left+r.width/2+o[0], r.top-st.top+r.height/2+o[1]]; }
+    KP.push([k[0],p]); prev=p;
+  }
+}
+const ease=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+function cursorAt(t){
+  if(t<=KP[0][0]) return KP[0][1];
+  for(let i=1;i<KP.length;i++){ if(t<=KP[i][0]){ const [t0,a]=KP[i-1],[t1,b]=KP[i]; const e=ease((t-t0)/(t1-t0));
+    // slight arc
+    const arc=Math.sin(e*Math.PI)*Math.min(40,Math.hypot(b[0]-a[0],b[1]-a[1])*0.08);
+    return [a[0]+(b[0]-a[0])*e, a[1]+(b[1]-a[1])*e - arc]; } }
+  return KP[KP.length-1][1];
+}
+function render(t){
+  applyState(t);
+  const [x,y]=cursorAt(t);
+  let press=false, rip=null;
+  for(const c of CLICKS){ if(between(t,c,c+0.12)) press=true; if(between(t,c,c+0.45)) rip=(t-c)/0.45; }
+  $('#cursor').style.transform=`translate(${x-2}px,${y-2}px) scale(${press?0.86:1})`;
+  $('#cursor').style.display = t<3.0||t>=27.4?'none':'block';
+  if(rip!==null && t<27.4){ const r=8+rip*26; Object.assign($('#ripple').style,{left:(x-r)+'px',top:(y-r)+'px',width:2*r+'px',height:2*r+'px',opacity:1-rip}); }
+  else $('#ripple').style.opacity=0;
+}
+init(); render(0);
+</script>
+</body></html>
