@@ -68,10 +68,10 @@ Teams of 5 (at least 1 builder, 1 product or design, 1 domain expert; plus found
 
 | Name | Role / background |
 |---|---|
-| Karthikeyan | Builder |
-| Sibu | CTO |
-| Kimberly | Founder |
-| Suraj | Domain expert |
+| Karthikeyan | |
+| Sibu | |
+| Kimberly | |
+| Suraj | |
 
 ## Credits
 Anthropic API and Python SDK (MIT). Everything else is the Python and Node standard libraries. Playwright and FFmpeg were used for the demo video (see [`demo-video/`](demo-video/)).
