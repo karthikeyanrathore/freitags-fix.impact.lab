@@ -22,12 +22,16 @@ Edit the `CAPS`, `CLICKS` and `K` (cursor keyframes) arrays in `scene.html` to c
 
 Credits: Playwright (Apache-2.0), FFmpeg (LGPL/GPL), DejaVu fonts.
 
-## Self-healing journey video (1:44)
+## Self-healing journey video (2:00)
 
-`freitags-self-healing-journey.mp4` (1920×1080, 30 fps, no audio) is the 6-step story: order page → topping save fails and the customer is asked to retry → the self-healing agent diagnoses, commits, re-tests and deploys the fix → retry works, checkout → happy customer → postmortem in the admin page.
+`freitags-self-healing-journey.mp4` (1920×1080, 30 fps, no audio):
+
+- **0:00–0:29, intro:** a "Freitags Fix Agent" title, then the problem card (Friday 7 pm outage and the cited Calyptix/ITIC 2025 downtime figure). Then a split screen of two fictional shops on the same vendor, Freitags Pizza and Kiezkorb Groceries, both hitting 429, 503 and 504 errors until the customers give up.
+- **0:29–2:00, the 5-step story:** a topping save fails and the customer is asked to retry → the agent diagnoses, commits, re-tests and deploys the fix → retry works and checkout → happy customer → postmortem in the admin page.
+- The transition cards show the Freitags Fix Agent wordmark behind the text.
 
 It's scripted animation (`journey.html`, rendered by `rec_journey.py`). The diff, commit message and owner summary come from the agent's real output. Topping customization, the retry prompt and the postmortem page are not in the app yet.
 
 ```bash
-python3 rec_journey.py journey.html freitags-self-healing-journey.mp4   # ~7 min
+python3 rec_journey.py journey.html freitags-self-healing-journey.mp4   # ~8 min, length comes from window.TOTAL
 ```

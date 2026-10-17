@@ -5,7 +5,7 @@ from playwright.sync_api import sync_playwright
 FPS, SCALE = 30, 1.5                    # 1280x720 CSS px x1.5 = 1920x1080
 src, out = Path(sys.argv[1]).resolve(), sys.argv[2]
 ff = subprocess.Popen(["ffmpeg", "-y", "-loglevel", "error", "-f", "image2pipe", "-framerate", str(FPS), "-i", "-",
-                       "-c:v", "libx264", "-preset", "medium", "-crf", "19", "-pix_fmt", "yuv420p",
+                       "-vf", "scale=out_range=tv", "-c:v", "libx264", "-preset", "medium", "-crf", "19", "-pix_fmt", "yuv420p",
                        "-movflags", "+faststart", out], stdin=subprocess.PIPE)
 with sync_playwright() as p:
     b = p.chromium.launch()
