@@ -23,8 +23,14 @@
 
 ## Phase 5: User Story 3 - Operator deploys on any VM (P3)
 - [x] T010 [US3] README: VM run steps
-- [ ] T011 [US3] `docker compose up -d --build` on the team VM; run the demo script from the README at `http://<vm>:8080/admin`
+- [x] T011 [US3] `docker compose up -d --build` on the team VM; run the demo script from the README at `http://<vm>:8080/admin` (live on Nebius: http://66.201.4.39:8080)
 - [ ] T012 [US3] Live run with a real `ANTHROPIC_API_KEY` in `.env`
+
+## Phase 6: CI/CD
+- [x] T015 `scripts/e2e.sh`: pages, healthy order, 429 outage → agent fix → health check 5/5 (passes locally)
+- [x] T016 `ci/workflows/ci.yml` (move to `.github/workflows/`): compose config, py_compile, build + start, E2E on every push/PR
+- [x] T017 `ci/workflows/deploy.yml` + `scripts/deploy.sh`: after CI on main, SSH to the VM, pull, rebuild, public smoke test
+- [ ] T018 Add `VM_SSH_KEY` secret and `VM_HOST`/`VM_USER`/`VM_APP_DIR` variables in the repo settings; first green deploy
 
 ## Phase N: Polish
 - [ ] T013 Optional `PUSH_FIXES=1` with a GitHub token so fix branches appear on GitHub

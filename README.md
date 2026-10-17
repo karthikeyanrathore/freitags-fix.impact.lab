@@ -46,6 +46,8 @@ docker compose up -d --build      # then open http://<vm-ip>:8080/admin
 | `agent` | Health check every 8 s, incidents, Claude diagnosis, fix commits on `fix/…` branches, re-test, deploy |
 | `valkey` | Shared state between `order-api` and `agent` |
 
+**CI/CD (GitHub Actions):** [`ci.yml`](ci/workflows/ci.yml) builds the stack on every push and runs [`scripts/e2e.sh`](scripts/e2e.sh) (429 outage → agent fix → health check 5/5). When CI passes on `main`, [`deploy.yml`](ci/workflows/deploy.yml) SSHes into the VM, runs [`scripts/deploy.sh`](scripts/deploy.sh) (`git pull` + `docker compose up -d --build`) and smoke-tests the public URL. Setup: repo secret `VM_SSH_KEY`; repo variables `VM_HOST`, `VM_USER`, `VM_APP_DIR` (optional `VM_PORT`). The workflow files are in [`ci/`](ci/) until someone with the `workflow` scope moves them to `.github/workflows/`.
+
 The agent writes fix branches into the repo clone on the VM (`git branch --list 'fix/*'`). Spec: [`specs/003-compose-self-healing-service/`](specs/003-compose-self-healing-service/).
 
 With no API key the agent runs in **rehearsal mode**: the diagnosis is a canned answer (clearly labelled in the admin panel), and everything else is real (alert, git commit, re-test, deploy, digest).
@@ -58,7 +60,7 @@ With no API key the agent runs in **rehearsal mode**: the diagnosis is a canned 
 5. The **Owner's inbox** gets the digest, and the customer view reloads on the fixed code. Add a pizza and check out: it works even though the vendor outage is still on.
 6. **Reset demo** puts the original code back live and turns the fault off. Fix branches stay in `git branch --list 'fix/*'` as history. Run with `PUSH_FIXES=1` to also push each fix branch to GitHub and link the commit in the digest.
 
-**Live link (if any):** <link>
+**Live link:** [shop](http://66.201.4.39:8080/) · [admin](http://66.201.4.39:8080/admin) (Nebius VM, Docker Compose)
 
 ## Screenshots / demo
 🎬 **[Watch the 2-minute demo video](https://drive.google.com/file/d/1sZD-eK_KXpYB-PhEOCqz_jFhCkm9sSTA/view?usp=sharing)** (Google Drive)

@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Build stack + self-healing E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 20          # the agent reads recent git history
+
+      - name: Validate compose file
+        run: docker compose config -q
+
+      - name: Python syntax
+        run: python3 -m py_compile services/order-api/app.py services/agent/app.py server.py agent/*.py
+
+      - name: Build and start (rehearsal mode, no API key)
+        run: docker compose up -d --build
+
+      - name: Self-healing E2E (429 outage -> agent fix -> 5/5)
+        run: bash scripts/e2e.sh http://127.0.0.1:8080
+
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --tail 200
+
+      - name: Stop
+        if: always()
+        run: docker compose down -v

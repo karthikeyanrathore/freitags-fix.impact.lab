@@ -1,0 +1,58 @@
+name: Deploy to Nebius VM
+
+# Runs after CI passes on main (or by hand). Needs these repo settings:
+#   Secrets:   VM_SSH_KEY   private key whose public key is in the VM user's ~/.ssh/authorized_keys
+#   Variables: VM_HOST      e.g. 66.201.4.39
+#              VM_USER      SSH user on the VM
+#              VM_APP_DIR   path of the repo clone on the VM
+#              VM_PORT      SSH port (optional, default 22)
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # Skips until the VM settings exist, so pushes stay green before setup.
+    if: vars.VM_HOST != '' && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: production
+      url: http://${{ vars.VM_HOST }}:8080/admin
+    env:
+      VM_HOST: ${{ vars.VM_HOST }}
+      VM_USER: ${{ vars.VM_USER }}
+      VM_APP_DIR: ${{ vars.VM_APP_DIR }}
+      VM_PORT: ${{ vars.VM_PORT || '22' }}
+      VM_SSH_KEY: ${{ secrets.VM_SSH_KEY }}
+    steps:
+      - name: Check settings
+        run: |
+          for v in VM_HOST VM_USER VM_APP_DIR; do [ -n "${!v}" ] || { echo "::error::Set repo variable $v"; exit 1; }; done
+          [ -n "$VM_SSH_KEY" ] || { echo "::error::Set repo secret VM_SSH_KEY"; exit 1; }
+
+      - name: Set up SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VM_SSH_KEY" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -p "$VM_PORT" -H "$VM_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Deploy
+        run: |
+          ssh -i ~/.ssh/id_deploy -p "$VM_PORT" -o BatchMode=yes "$VM_USER@$VM_HOST" \
+            "cd '$VM_APP_DIR' && bash scripts/deploy.sh origin/main"
+
+      - name: Smoke test from the internet
+        run: |
+          for p in / /admin /api/state; do
+            code=$(curl -s -m 10 -o /dev/null -w '%{http_code}' "http://$VM_HOST:8080$p")
+            echo "$p -> $code"; [ "$code" = 200 ] || exit 1
+          done
+          curl -fsS "http://$VM_HOST:8080/api/state" | python3 -c "import json,sys; s=json.load(sys.stdin); print('live:', s['live']['branch'], '@', s['live']['ref'], '| agent:', s['mode'])"
