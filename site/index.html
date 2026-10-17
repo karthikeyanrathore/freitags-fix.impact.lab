@@ -41,6 +41,10 @@
   .cart select, .cart button.order { width: 100%; padding: 10px; margin-top: 8px; border-radius: 8px; font-size: 1rem; }
   .cart button.order { background: var(--red); color: #fff; border: 0; font-weight: 700; cursor: pointer; }
   .msg { color: var(--green); font-weight: 600; margin-top: 8px; }
+  .add:disabled { opacity: .6; cursor: wait; }
+  .msg.err { color: var(--red); }
+  .toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--dark); color: #fff; padding: 12px 18px; border-radius: 10px; font-weight: 600; z-index: 30; max-width: 90%; display: none; }
+  .toast.err { background: var(--red); }
   footer { text-align: center; color: var(--muted); padding: 20px 16px; font-size: .85rem; }
 </style>
 </head>
@@ -76,9 +80,29 @@
   <div class="msg" id="orderMsg"></div>
 </aside>
 
+<div class="toast" id="toast"></div>
+
 <footer>Demo site with sample data · Claude Impact Lab Berlin 2026</footer>
 
-<script>
+<script type="module">
+import { addToCart, checkout } from "./cart-client.js";
+
+const API = location.origin;
+const cartId = sessionStorage.cartId || (sessionStorage.cartId = "web-" + Math.random().toString(36).slice(2, 10));
+
+// Tell the shop's monitoring about errors real customers hit
+function reportError(action, err) {
+  fetch("/api/telemetry", { method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, endpoint: err.endpoint, status: err.status ?? null, message: err.message }) }).catch(() => {});
+}
+
+let toastTimer;
+function toast(text, isError) {
+  const el = document.getElementById("toast");
+  el.textContent = text; el.className = "toast" + (isError ? " err" : ""); el.style.display = "block";
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => (el.style.display = "none"), 3000);
+}
+
 // Sample menu (fake data for the demo)
 const MENU = [
   { id: 1,  cat: "pizza",    emoji: "🍕", name: "Margherita",         desc: "San Marzano tomato, fior di latte, basil, olive oil.", price: 9.5,  tags: ["veggie", "bestseller"] },
@@ -169,24 +193,49 @@ document.getElementById("filters").addEventListener("click", e => {
   document.querySelectorAll("#filters button").forEach(b => b.classList.toggle("active", b === e.target));
   renderMenu();
 });
-document.getElementById("menu").addEventListener("click", e => {
-  const id = e.target.dataset.id;
-  if (!id) return;
-  cart[id] = (cart[id] || 0) + 1;
-  renderCart();
+document.getElementById("menu").addEventListener("click", async e => {
+  const btn = e.target, id = btn.dataset.id;
+  if (!id || btn.disabled) return;
+  btn.disabled = true; btn.textContent = "Adding…";
+  try {
+    const res = await addToCart(API, cartId, Number(id));
+    for (const k in cart) delete cart[k];
+    Object.assign(cart, res.cart);
+    renderCart();
+    toast(`Added ${MENU.find(m => m.id == id).name} 🍕`);
+  } catch (err) {
+    toast(`Sorry, we couldn't add that (error ${err.status ?? "network"}). Please try again.`, true);
+    reportError("add to cart", err);
+  } finally {
+    btn.disabled = false; btn.textContent = "Add";
+  }
 });
 const cartEl = document.getElementById("cart");
 document.getElementById("cartBtn").onclick = () => cartEl.classList.add("open");
 document.getElementById("closeCart").onclick = () => cartEl.classList.remove("open");
-document.getElementById("orderBtn").onclick = () => {
-  const msg = document.getElementById("orderMsg");
+document.getElementById("orderBtn").onclick = async () => {
+  const msg = document.getElementById("orderMsg"), btn = document.getElementById("orderBtn");
+  msg.className = "msg";
   if (!Object.keys(cart).length) { msg.textContent = "Your cart is empty."; return; }
-  msg.textContent = `✅ Order placed! Pick up at ${document.getElementById("slot").value.replace(" (rush)", "")}.`;
-  for (const k in cart) delete cart[k];
-  renderCart();
+  const slot = document.getElementById("slot").value.replace(" (rush)", "");
+  btn.disabled = true; msg.textContent = "Placing your order…";
+  try {
+    const res = await checkout(API, cartId, slot);
+    msg.textContent = `✅ Order ${res.orderId} placed! Pick up at ${slot}.`;
+    for (const k in cart) delete cart[k];
+    renderCart();
+  } catch (err) {
+    msg.className = "msg err";
+    msg.textContent = `❌ We couldn't place your order (error ${err.status ?? "network"}). Please try again.`;
+    reportError("checkout", err);
+  } finally {
+    btn.disabled = false;
+  }
 };
 
 renderRush(); renderMenu(); renderCart(); renderSlots();
+// Restore this visitor's cart after a page reload
+fetch(`/api/cart?cartId=${cartId}`).then(r => r.json()).then(res => { Object.assign(cart, res.cart); renderCart(); }).catch(() => {});
 </script>
 </body>
 </html>

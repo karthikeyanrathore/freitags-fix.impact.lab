@@ -1,0 +1,14 @@
+{
+  "diagnosis": "[REHEARSAL, not a real Claude answer] The health check's add-to-cart and checkout calls are failing with temporary errors from the hosting vendor (rate limiting / unavailable / gateway timeout). Real customers are reporting the same failures from their browsers.",
+  "root_cause": "The shop's cart client gives up on the first error. It never retries the temporary errors the vendor documents, and it sends no Idempotency-Key, so a retried timeout could add a pizza twice.",
+  "fix_summary": "Retry 429/502/503/504 and network errors up to 4 times with short backoff (honouring Retry-After), and send one Idempotency-Key per click, reused across retries, so each Add registers exactly once.",
+  "commit_message": "Retry temporary vendor errors with an idempotency key\n\nThe ordering API sheds load with 429/503/504. The cart client failed on the\nfirst error, so customers' Add clicks were lost. Retry with backoff, honour\nRetry-After, and reuse one Idempotency-Key per action so retries never\ndouble-add.",
+  "risk": "During a long outage customers wait a few seconds longer before seeing an error. Retries add some load on the vendor.",
+  "digest": {
+    "headline": "Your online ordering hiccupped, and it's fixed",
+    "what_happened": "Your website's ordering system was temporarily overloaded and rejected some requests.",
+    "customer_impact": "Some customers clicked 'Add' and nothing was added to their basket, so a few orders may have been lost during the problem.",
+    "what_we_changed": "The website now quietly tries again when the ordering system is briefly busy, and makes sure a pizza is never added twice.",
+    "status": "Fixed and tested. The automated test customer can order again."
+  }
+}
