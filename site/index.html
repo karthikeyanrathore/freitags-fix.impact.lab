@@ -74,6 +74,11 @@
   .chip .e { font-size: 1.2rem; } .chip small { margin-left: auto; font-weight: 400; color: var(--muted); font-size: .75rem; }
   .chip.on { background: var(--red); border-color: var(--red); color: #fff; } .chip.on small { color: #fbd4da; }
   .chip.pend { border-style: dashed; border-color: var(--amber); background: #fff8e6; }
+  .retry { margin-top: 16px; background: #fff6dc; border: 2px solid #f0cf73; border-radius: 14px; padding: 12px 14px; display: none; align-items: center; gap: 12px; }
+  .retry.show { display: flex; }
+  .retry .t { flex: 1; font-size: .9rem; line-height: 1.4; } .retry .t b { display: block; font-size: .95rem; }
+  .retry button { background: var(--dark); color: #fff; border: 0; border-radius: 10px; padding: 10px 16px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+  .retry button:disabled { opacity: .6; cursor: wait; }
   .bfoot { display: flex; align-items: center; justify-content: space-between; margin-top: 22px; }
   .bfoot .tot { color: var(--muted); font-size: .85rem; } .bfoot .tot b { display: block; color: var(--dark); font-size: 1.5rem; }
   .bfoot .order { background: var(--red); color: #fff; border: 0; border-radius: 12px; padding: 13px 22px; font-weight: 700; font-size: 1rem; cursor: pointer; }
@@ -131,6 +136,7 @@
     <div class="seg" id="bSizes"></div>
     <div class="lbl">TOPPINGS · €1.20 EACH</div>
     <div class="chips" id="bToppings"></div>
+    <div class="retry" id="bRetry" role="status"><div class="t" id="bRetryText"></div><button id="bRetryBtn">Try again</button></div>
     <div class="bfoot"><div class="tot">Your pizza<b id="bPrice">€0.00</b></div><button class="order" id="bAdd">Add to order</button></div>
   </div>
 </div></div>
@@ -277,7 +283,7 @@ const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2
 let draft = null;   // { lineId, itemId, size, toppings: [], pending: Set, state: "idle"|"saving"|"saved"|"error" }
 
 function openBuilder(itemId) {
-  draft = { lineId: newId(), itemId, size: "M", toppings: [], pending: new Set(), state: "idle" };
+  draft = { lineId: newId(), itemId, size: "M", toppings: [], pending: new Set(), state: "idle", fails: 0, failed: null, busy: false };
   document.getElementById("builder").classList.add("open");
   renderBuilder();
 }
@@ -306,6 +312,13 @@ function renderBuilder() {
   sv.className = "saved" + (draft.state === "saving" ? " busy" : draft.state === "error" ? " bad" : "");
   sv.textContent = { idle: "", saving: "Saving…", saved: "Saved to your order ✓",
     error: `Waiting to save ${[...draft.pending].map(k => TOPPINGS.find(t => t.k === k).name.toLowerCase()).join(", ") || "your choice"}` }[draft.state];
+  const what = draft.failed === "add" ? "your pizza" : "your " + ([...draft.pending].map(k => TOPPINGS.find(t => t.k === k).name.toLowerCase()).join(", ") || "choice");
+  document.getElementById("bRetry").classList.toggle("show", !!draft.failed);
+  document.getElementById("bRetryText").innerHTML = draft.fails <= 1
+    ? `<b>The kitchen is very busy right now</b>We couldn't ${draft.failed === "add" ? "add" : "save"} ${what} yet. Your pizza is safe, tap to try again.`
+    : `<b>Still busy, give it a moment</b>Your choices are kept. Try again in a few seconds.`;
+  const rb = document.getElementById("bRetryBtn");
+  rb.disabled = draft.busy; rb.textContent = draft.busy ? "Trying…" : "Try again";
   document.getElementById("bPrice").textContent = "€" + line.price.toFixed(2);
   document.getElementById("bAdd").textContent = `Add to order · €${line.price.toFixed(2)}`;
 }
@@ -314,16 +327,16 @@ function lineKey() { return `${draft.itemId}|${draft.size}|${draft.toppings.filt
 // Save the current choices; `changed` is the topping that triggered it (marked "not saved" on failure)
 async function saveDraft(changed) {
   const d = draft;
-  d.state = "saving"; renderBuilder();
+  d.state = "saving"; d.busy = true; renderBuilder();
   try {
     await saveOption(API, cartId, d.lineId, { itemId: d.itemId, size: d.size, toppings: d.toppings });
-    d.pending.clear(); d.state = "saved";
+    d.pending.clear(); d.state = "saved"; d.failed = null; d.fails = 0;
   } catch (err) {
     if (changed && d.toppings.includes(changed)) d.pending.add(changed);
-    d.state = "error";
-    toast(`Sorry, we couldn't save that (error ${err.status ?? "network"}). Please try again.`, true);
+    d.state = "error"; d.failed = "save"; d.fails += 1;
     reportError("save topping", err);
   }
+  d.busy = false;
   if (draft === d) renderBuilder();
 }
 
@@ -338,6 +351,11 @@ document.getElementById("bToppings").addEventListener("click", e => {
   draft.toppings = draft.toppings.includes(k) ? draft.toppings.filter(x => x !== k) : [...draft.toppings, k];
   saveDraft(draft.toppings.includes(k) ? k : null);
 });
+document.getElementById("bRetryBtn").onclick = () => {
+  if (!draft || draft.busy) return;
+  if (draft.failed === "add") return document.getElementById("bAdd").click();
+  saveDraft([...draft.pending][0] || null);
+};
 document.getElementById("bClose").onclick = closeBuilder;
 document.getElementById("builder").addEventListener("click", e => { if (e.target.id === "builder") closeBuilder(); });
 document.getElementById("bAdd").onclick = async () => {
@@ -351,7 +369,7 @@ document.getElementById("bAdd").onclick = async () => {
     renderCart(); closeBuilder();
     toast(`🍕 ${line.name} added to your order`);
   } catch (err) {
-    toast(`Sorry, we couldn't add that (error ${err.status ?? "network"}). Please try again.`, true);
+    if (draft) { draft.failed = "add"; draft.fails += 1; }
     reportError("add to cart", err);
   } finally {
     btn.disabled = false; if (draft) renderBuilder();
@@ -370,7 +388,7 @@ document.getElementById("menu").addEventListener("click", async e => {
     renderCart();
     toast(`Added ${MENU.find(m => m.id == id).name} 🍕`);
   } catch (err) {
-    toast(`Sorry, we couldn't add that (error ${err.status ?? "network"}). Please try again.`, true);
+    toast("The kitchen is very busy right now. Your basket is safe, tap Add again in a moment.");
     reportError("add to cart", err);
   } finally {
     btn.disabled = false; btn.textContent = "Add";
@@ -392,7 +410,7 @@ document.getElementById("orderBtn").onclick = async () => {
     renderCart();
   } catch (err) {
     msg.className = "msg err";
-    msg.textContent = `❌ We couldn't place your order (error ${err.status ?? "network"}). Please try again.`;
+    msg.textContent = "The kitchen is very busy right now. Your order is safe, tap Place order again in a moment.";
     reportError("checkout", err);
   } finally {
     btn.disabled = false;
