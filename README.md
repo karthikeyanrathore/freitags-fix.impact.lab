@@ -11,7 +11,9 @@
 **One line:** <what it does, for whom>
 
 ## The problem
-<Who has this problem, and why it matters. 2–3 sentences.>
+It's 7 pm on a Friday, one of the busiest nights of the week, and a Berlin pizzeria's online ordering stops working. The owner can't read code, the web agency won't pick up until Monday, and every hungry customer who can't order simply goes next door. In a 2025 survey of small businesses, 37% said a single hour of downtime costs them $1,000 to $5,000 ([Calyptix/ITIC](https://www.calyptix.com/?p=6720)). Big companies already use AI to keep their sites running around the clock. We think every small business should have the same help, simple enough to switch on without technical skills, so owners start to see AI as a partner in growing their business, not something only tech companies use.
+
+*Worked example (illustrative numbers):* for a pizzeria taking 30 online orders an hour at an average of €25, a two-hour Friday outage means about €1,500 in lost sales, before counting the customers who don't come back.
 
 ## What it does
 <What a user can do with it. A short list is fine.>
