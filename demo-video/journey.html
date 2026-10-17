@@ -1,0 +1,476 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Freitags journey</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1280px;height:720px;overflow:hidden;background:#111;font-family:system-ui,-apple-system,"Segoe UI","DejaVu Sans",sans-serif}
+:root{--red:#c8102e;--cream:#fff8ec;--dark:#2b1d14;--muted:#7a6a5c;--green:#2e7d32;--amber:#e8a317;--line:#eadfce}
+#stage{position:relative;width:1280px;height:720px;overflow:hidden;background:var(--cream);color:var(--dark)}
+.layer{position:absolute;inset:0;opacity:0}
+.mono{font-family:"DejaVu Sans Mono",ui-monospace,monospace}
+/* browser chrome */
+.chrome{height:46px;background:#e9e6e1;border-bottom:1px solid #cfcac2;display:flex;align-items:center;gap:14px;padding:0 16px}
+.dots span{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:6px}
+.url{flex:1;height:28px;background:#fff;border-radius:14px;display:flex;align-items:center;padding:0 14px;font-size:13px;color:#333}
+.url i{color:#1a7f37;margin-right:8px;font-style:normal;font-size:11px}
+.view{position:absolute;top:46px;left:0;right:0;bottom:0;overflow:hidden;background:var(--cream)}
+/* shop */
+.shead{background:var(--red);color:#fff;height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 28px}
+.shead h1{font-size:22px}
+.cartbtn{background:#fff;color:var(--red);border-radius:20px;padding:6px 14px;font-weight:700;font-size:15px}
+.rush{margin:16px 28px 12px;padding:11px 16px;border-radius:12px;background:#fdecea;border:2px solid var(--red);font-weight:600;font-size:15px}
+.rush small{display:block;font-weight:400;margin-top:3px;font-size:13px}
+.filters{display:flex;gap:8px;margin:0 28px 14px}
+.filters span{border:1.5px solid var(--line);background:#fff;border-radius:18px;padding:5px 14px;font-size:13px}
+.filters .on{background:var(--dark);color:#fff;border-color:var(--dark)}
+.menu{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:0 28px}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.card .em{font-size:40px}
+.card h3{font-size:17px;margin:6px 0 4px}
+.card p{font-size:12.5px;color:var(--muted);height:34px;line-height:17px}
+.tags span{display:inline-block;font-size:11px;background:#f3ead9;border-radius:8px;padding:2px 7px;margin:6px 4px 0 0;color:#6b5a48}
+.crow{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+.crow b{font-size:16px}
+.btn2{border:1.5px solid var(--red);color:var(--red);border-radius:8px;padding:6px 10px;font-weight:700;font-size:13px;margin-right:6px}
+.add{background:var(--red);color:#fff;border-radius:8px;padding:7px 12px;font-weight:700;font-size:13px}
+.hover{box-shadow:0 0 0 3px #f1c6cd}
+/* customizer */
+.scrim{position:absolute;inset:0;background:rgba(43,29,20,.45);display:flex;align-items:center;justify-content:center}
+.cust{width:960px;height:540px;background:#fff;border-radius:20px;display:flex;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.3)}
+.cust .left{width:400px;background:#fbf1df;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.pie{position:relative;width:290px;height:290px;border-radius:50%;background:radial-gradient(circle,#d8452f 0 118px,#e8b169 119px 145px)}
+.pie .cheese{position:absolute;border-radius:50%;background:#fff3d4}
+.pie .tp{position:absolute;font-size:30px;transform:translate(-50%,-50%) scale(0)}
+.cust .left .pname{margin-top:18px;font-weight:700;font-size:18px}
+.cust .left .psub{color:var(--muted);font-size:13px;margin-top:4px;height:18px}
+.cust .right{flex:1;padding:26px 30px;position:relative}
+.cust h2{font-size:26px}
+.saved{position:absolute;right:28px;top:30px;font-size:13px;font-weight:600;color:var(--green)}
+.saved.busy{color:var(--muted)}
+.lbl{font-size:12px;letter-spacing:1.5px;color:var(--muted);font-weight:700;margin:20px 0 10px}
+.seg{display:flex;gap:8px}
+.seg span{flex:1;text-align:center;border:1.5px solid var(--line);border-radius:10px;padding:9px 0;font-size:14px;font-weight:600}
+.seg span small{display:block;font-weight:400;color:var(--muted);font-size:11px}
+.seg .on{border-color:var(--red);background:#fdecea;color:var(--red)}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.chip{border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.chip .e{font-size:20px}
+.chip small{margin-left:auto;font-weight:400;color:var(--muted);font-size:12px}
+.chip.on{background:var(--red);border-color:var(--red);color:#fff}
+.chip.on small{color:#fbd4da}
+.chip.pend{border-style:dashed;border-color:var(--amber);background:#fff8e6}
+.retry{margin-top:16px;background:#fff6dc;border:1.5px solid #f0cf73;border-radius:14px;padding:13px 16px;display:flex;align-items:center;gap:14px}
+.retry .t{flex:1;font-size:14px;line-height:1.4}
+.retry .t b{display:block;font-size:15px}
+#retry-btn{background:var(--dark);color:#fff;border-radius:10px;padding:10px 16px;font-weight:700;font-size:14px;white-space:nowrap}
+.foot{position:absolute;left:30px;right:30px;bottom:24px;display:flex;align-items:center;justify-content:space-between}
+.foot .tot{font-size:14px;color:var(--muted)}
+.foot .tot b{display:block;color:var(--dark);font-size:24px}
+#addorder{background:var(--red);color:#fff;border-radius:12px;padding:14px 26px;font-weight:700;font-size:16px}
+.toast{position:absolute;left:50%;top:9px;z-index:5;transform:translateX(-50%);background:var(--dark);color:#fff;padding:11px 18px;border-radius:12px;font-weight:600;font-size:15px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+/* drawer */
+.drawer{position:absolute;top:58px;right:0;bottom:0;width:420px;background:#fff;box-shadow:-20px 0 50px rgba(0,0,0,.18);padding:24px 26px}
+.drawer h3{font-size:22px}
+.ditem{display:flex;gap:14px;align-items:center;margin:20px 0;padding:14px;border:1px solid var(--line);border-radius:14px}
+.ditem .em{font-size:34px}
+.ditem .n{flex:1;font-weight:700}
+.ditem .n small{display:block;font-weight:400;color:var(--muted);font-size:12.5px;margin-top:3px;line-height:1.35}
+.dline{display:flex;justify-content:space-between;margin:12px 0;font-size:15px}
+.slot{border:1.5px solid var(--line);border-radius:10px;padding:10px 14px;font-size:15px;display:flex;justify-content:space-between}
+#placeorder{display:block;text-align:center;margin-top:22px;background:var(--red);color:#fff;border-radius:12px;padding:15px;font-weight:700;font-size:17px}
+/* confirmation */
+.confirm{position:absolute;inset:58px 0 0 0;display:flex;align-items:center;justify-content:center}
+.ccard{width:620px;background:#fff;border-radius:22px;padding:34px 40px;text-align:center;box-shadow:0 20px 60px rgba(43,29,20,.12)}
+.ccard .big{font-size:64px}
+.ccard h2{font-size:30px;margin:10px 0 6px}
+.ccard p{color:var(--muted);font-size:16px;line-height:1.5}
+.stars{margin-top:22px;font-size:13px;color:var(--muted)}
+.stars div{margin-top:8px;display:flex;gap:10px;justify-content:center}
+.stars span{font-size:34px;color:#e2d6c3}
+.stars span.on{color:#f2b01e}
+.reply{margin-top:12px;font-size:17px;font-weight:600;height:24px}
+.conf{position:absolute;width:10px;height:14px;border-radius:2px}
+/* agent console */
+#agent{background:#0f1419;color:#e6edf3}
+.ahead{height:64px;display:flex;align-items:center;gap:14px;padding:0 28px;border-bottom:1px solid #263040}
+.ahead h1{font-size:20px}
+.ahead .sub{color:#8b98a8;font-size:14px}
+.pill{border-radius:14px;padding:4px 12px;font-size:12.5px;font-weight:700}
+.p-ok{background:#12351f;color:#5fd38a}.p-bad{background:#3d1416;color:#ff7b72}.p-info{background:#1c2a3d;color:#8cc2ff}
+.agrid{display:flex;gap:22px;padding:20px 28px}
+.acol{width:440px}
+.panel{background:#161d26;border:1px solid #263040;border-radius:14px;padding:18px 20px;margin-bottom:16px}
+.panel h4{font-size:12px;letter-spacing:1.5px;color:#8b98a8;margin-bottom:12px}
+.status{font-size:30px;font-weight:800}
+.bars{display:flex;gap:4px;align-items:flex-end;height:70px;margin:14px 0 8px}
+.bars i{flex:1;border-radius:3px}
+.kv{display:flex;justify-content:space-between;font-size:14px;color:#b9c4d0;margin-top:6px}
+.kv b{color:#fff}
+.diff{font-family:"DejaVu Sans Mono",monospace;font-size:11.5px;line-height:1.55;white-space:pre;overflow:hidden;color:#c9d1d9}
+.diff .a{color:#7ee787;background:rgba(46,160,67,.15);display:block}
+.diff .d{color:#ffa198;background:rgba(248,81,73,.15);display:block}
+.diff .h{color:#79c0ff}
+.tl{flex:1}
+.tl h4{font-size:12px;letter-spacing:1.5px;color:#8b98a8;margin:2px 0 14px}
+.ev{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid #1d2632}
+.ev .ic{width:34px;height:34px;border-radius:50%;background:#1c2530;display:flex;align-items:center;justify-content:center;font-size:17px;flex:none}
+.ev .bd{flex:1}
+.ev .tt{font-weight:700;font-size:15px;display:flex;justify-content:space-between}
+.ev .tt span{color:#6e7c8c;font-weight:400;font-size:12.5px;font-family:"DejaVu Sans Mono",monospace}
+.ev .ds{color:#9fb0c2;font-size:13px;margin-top:3px;line-height:1.4}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid #3b4a5c;border-top-color:#8cc2ff;border-radius:50%;vertical-align:-2px;margin-left:8px}
+.ttf{position:absolute;right:28px;bottom:24px;text-align:right;color:#8b98a8;font-size:13px}
+.ttf b{display:block;font-size:34px;color:#fff;font-family:"DejaVu Sans Mono",monospace}
+/* admin */
+.abar{height:52px;background:#2b1d14;color:#fff;display:flex;align-items:center;gap:12px;padding:0 22px;font-size:15px}
+.abar b{font-size:16px}
+.abar .pill{font-size:12px}
+.anav{position:absolute;top:52px;left:0;bottom:0;width:200px;background:#fff;border-right:1px solid var(--line);padding:18px 12px}
+.anav div{padding:10px 14px;border-radius:10px;font-size:14px;margin-bottom:4px;color:#5c4f43}
+.anav .on{background:#fdecea;color:var(--red);font-weight:700}
+.amain{position:absolute;top:52px;left:200px;right:0;bottom:0;overflow:hidden}
+.doc{padding:26px 40px 120px;max-width:980px}
+.doc .top{display:flex;align-items:center;gap:12px}
+.doc h2{font-size:28px}
+.res{background:#e8f5e9;color:var(--green);border-radius:12px;padding:4px 12px;font-weight:700;font-size:13px}
+.doc .by{color:var(--muted);font-size:13.5px;margin-top:6px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:20px 0 8px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.stat b{display:block;font-size:26px}
+.stat span{font-size:12.5px;color:var(--muted)}
+.sec{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin-top:14px}
+.sec h3{font-size:13px;letter-spacing:1.5px;color:var(--muted);margin-bottom:10px}
+.sec p{font-size:15px;line-height:1.55}
+.tlrow{display:flex;gap:16px;font-size:14px;padding:6px 0;border-bottom:1px solid #f3ebdd}
+.tlrow .mono{color:var(--muted);width:76px;font-size:13px}
+.fu{font-size:15px;margin:7px 0}
+.code{background:#f3ead9;border-radius:6px;padding:1px 7px;font-family:"DejaVu Sans Mono",monospace;font-size:13px}
+.acts{display:flex;gap:12px;margin-top:18px;align-items:center}
+#approve{background:var(--red);color:#fff;border-radius:12px;padding:12px 22px;font-weight:700;font-size:15px}
+.acts .g{border:1.5px solid var(--line);border-radius:12px;padding:10px 20px;color:var(--muted);font-size:15px}
+/* overlays */
+.card-ov{position:absolute;inset:0;background:#17120f;color:#fbf4e8;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;opacity:0}
+.card-ov h1{font-family:"DejaVu Serif",serif;font-size:58px;letter-spacing:-1px}
+.card-ov h1 em{color:#e9b45f;font-style:normal}
+.card-ov p{margin-top:16px;font-size:21px;color:#cbbda9;max-width:860px;line-height:1.45}
+.card-ov small{margin-top:30px;font-size:13px;letter-spacing:3px;color:#8d7f71}
+.inter{font-family:"DejaVu Serif",serif;font-size:40px}
+#caption{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);background:rgba(20,16,13,.93);color:#fff;font-size:18px;font-weight:600;padding:11px 22px 11px 12px;border-radius:30px;white-space:nowrap;opacity:0;box-shadow:0 8px 30px rgba(0,0,0,.35);z-index:50}
+#caption b{background:var(--red);border-radius:16px;padding:3px 12px;font-size:13px;margin-right:12px;letter-spacing:.5px}
+#cursor{position:absolute;left:0;top:0;width:26px;height:34px;z-index:60}
+#ripple{position:absolute;border:3px solid var(--red);border-radius:50%;opacity:0;z-index:59}
+</style></head>
+<body><div id="stage">
+
+<!-- ============ SHOP ============ -->
+<div class="layer" id="L-shop">
+  <div class="chrome"><div class="dots"><span style="background:#ff5f57"></span><span style="background:#febc2e"></span><span style="background:#28c840"></span></div>
+    <div class="url"><i>●</i><span id="shop-url">freitagspizza.example/order</span></div></div>
+  <div class="view">
+    <div class="shead"><h1>🍕 Freitags Pizza</h1><span class="cartbtn">🛒 <span id="cartn">0</span></span></div>
+    <div id="menuview">
+      <div class="rush">🔥 Friday rush: the kitchen is very busy (wait ~45 min).<small>Pre-order now and pick a time slot to skip the queue.</small></div>
+      <div class="filters"><span class="on">All</span><span>Pizza</span><span>Sandwiches</span><span>Sides &amp; Drinks</span></div>
+      <div class="menu">
+        <div class="card" id="card-0"><div class="em">🍕</div><h3>Margherita</h3><p>San Marzano tomato, fior di latte, basil, olive oil.</p><div class="tags"><span>veggie</span><span>bestseller</span></div>
+          <div class="crow"><b>€9.50</b><span><span class="btn2" id="cust-btn-0">Customize</span><span class="add">Add</span></span></div></div>
+        <div class="card" id="card-1"><div class="em">🌶️</div><h3>Diavola</h3><p>Spicy salami, tomato, mozzarella, chili oil.</p><div class="tags"><span>spicy</span></div>
+          <div class="crow"><b>€12.00</b><span><span class="btn2">Customize</span><span class="add">Add</span></span></div></div>
+        <div class="card" id="card-2"><div class="em">🍄</div><h3>Funghi e Tartufo</h3><p>Mushrooms, truffle cream, mozzarella, thyme.</p><div class="tags"><span>veggie</span></div>
+          <div class="crow"><b>€13.50</b><span><span class="btn2">Customize</span><span class="add">Add</span></span></div></div>
+        <div class="card" id="card-3"><div class="em">🥬</div><h3>Vegan Verde</h3><p>Pesto, zucchini, spinach, cashew cheese.</p><div class="tags"><span>vegan</span></div>
+          <div class="crow"><b>€12.00</b><span><span class="btn2">Customize</span><span class="add">Add</span></span></div></div>
+      </div>
+    </div>
+
+    <div class="scrim" id="custm" style="display:none"><div class="cust">
+      <div class="left">
+        <div class="pie" id="pie">
+          <div class="cheese" style="left:70px;top:80px;width:46px;height:40px"></div><div class="cheese" style="left:170px;top:70px;width:52px;height:44px"></div>
+          <div class="cheese" style="left:110px;top:165px;width:58px;height:48px"></div><div class="cheese" style="left:196px;top:170px;width:40px;height:36px"></div>
+        </div>
+        <div class="pname">Your Margherita</div><div class="psub" id="psub">Classic</div>
+      </div>
+      <div class="right">
+        <h2>Build your Margherita</h2>
+        <div class="saved" id="saved">Nothing added yet</div>
+        <div class="lbl">SIZE</div>
+        <div class="seg"><span id="size-0">Small<small>26 cm</small></span><span id="size-1">Medium<small>30 cm</small></span><span id="size-2">Large<small>36 cm · +€3.00</small></span></div>
+        <div class="lbl">TOPPINGS · €1.20 EACH</div>
+        <div class="chips">
+          <div class="chip" id="chip-0"><span class="e">🍄</span>Mushrooms<small>+1.20</small></div>
+          <div class="chip" id="chip-1"><span class="e">🫒</span>Olives<small>+1.20</small></div>
+          <div class="chip" id="chip-2"><span class="e">🌿</span>Rocket<small id="chip-2-s">+1.20</small></div>
+          <div class="chip" id="chip-3"><span class="e">🌶️</span>Chili<small>+1.20</small></div>
+          <div class="chip"><span class="e">🧀</span>Burrata<small>+1.20</small></div>
+          <div class="chip"><span class="e">🧅</span>Red onion<small>+1.20</small></div>
+        </div>
+        <div class="retry" id="retrybox" style="display:none">
+          <div class="t" id="retry-t"></div><span id="retry-btn">Try again</span>
+        </div>
+        <div class="foot"><div class="tot">Your pizza<b id="price">€9.50</b></div><span id="addorder">Add to order</span></div>
+      </div>
+    </div></div>
+
+    <div class="toast" id="toast" style="display:none"></div>
+
+    <div class="drawer" id="drawer" style="display:none">
+      <h3>Your order</h3>
+      <div class="ditem"><div class="em">🍕</div><div class="n">Margherita · Large<small>Mushrooms, olives, rocket, chili</small></div><b id="dprice">€17.30</b></div>
+      <div class="dline"><span>Pick-up time</span><span style="color:var(--muted)">skip the queue</span></div>
+      <div class="slot"><span>19:00</span><span>▾</span></div>
+      <div class="dline" style="margin-top:22px;font-size:20px;font-weight:700"><span>Total</span><span id="dtotal">€17.30</span></div>
+      <span id="placeorder">Place order</span>
+    </div>
+
+    <div class="confirm" id="confirm" style="display:none"><div class="ccard">
+      <div class="big">✅</div>
+      <h2>Order FP-1842 confirmed!</h2>
+      <p>Your Margherita with mushrooms, olives, rocket and chili<br>is in the oven. Pick up at <b>19:00</b>, no queue.</p>
+      <div class="stars">How easy was ordering today?<div><span id="star-0">★</span><span id="star-1">★</span><span id="star-2">★</span><span id="star-3">★</span><span id="star-4">★</span></div></div>
+      <div class="reply" id="reply"></div>
+    </div></div>
+    <div id="confetti"></div>
+  </div>
+</div>
+
+<!-- ============ AGENT ============ -->
+<div class="layer" id="agent">
+  <div class="ahead"><span style="font-size:26px">🤖</span><h1>Self-healing agent</h1><span class="sub">watching freitagspizza.example</span>
+    <span class="pill p-info">Autopilot ON</span><span style="margin-left:auto" class="pill" id="livebadge"></span></div>
+  <div class="agrid">
+    <div class="acol">
+      <div class="panel" id="healthp">
+        <h4>ADD-TO-CART · LAST 2 MIN</h4>
+        <div class="status" id="astatus">Healthy</div>
+        <div class="bars" id="bars"></div>
+        <div class="kv"><span>Vendor errors</span><b id="errrate">0%</b></div>
+        <div class="kv"><span>Customers shown a retry prompt</span><b id="retries">0</b></div>
+        <div class="kv"><span>Health check</span><b id="hc">every 8 s</b></div>
+      </div>
+      <div class="panel" id="diffp" style="display:none">
+        <h4>📝 FIX · site/cart-client.js · 443d1478</h4>
+<div class="diff"><span class="h">@@ -10,14 +10,32 @@</span>
+<span class="a">+const RETRYABLE = new Set([429, 502, 503, 504]);</span><span class="a">+const MAX_ATTEMPTS = 4;</span>
+ async function post(baseUrl, path, body) {
+<span class="d">-  const res = await fetch(baseUrl + path, {</span><span class="d">-  if (!res.ok) throw new ApiError(res.status, path);</span><span class="a">+  // One key per action, reused on every retry</span><span class="a">+  const idempotencyKey = crypto.randomUUID();</span><span class="a">+  for (let attempt = 1; ; attempt++) {</span><span class="a">+    res = await fetch(baseUrl + path, { headers:</span><span class="a">+      { "Idempotency-Key": idempotencyKey }, ... });</span><span class="a">+    if (res.ok) return res.json();</span><span class="a">+    if (!RETRYABLE.has(res.status) || attempt >= MAX)</span><span class="a">+      throw new ApiError(res.status, path);</span><span class="a">+    await sleep(retryAfter || 150 * 2 ** attempt);</span><span class="a">+  }</span>
+ }</div>
+      </div>
+    </div>
+    <div class="tl">
+      <h4>AGENT RUN · INC-1842</h4>
+      <div id="evs"></div>
+    </div>
+  </div>
+  <div class="ttf">Time to fix<b id="ttf">00:00</b></div>
+</div>
+
+<!-- ============ ADMIN ============ -->
+<div class="layer" id="L-admin">
+  <div class="chrome"><div class="dots"><span style="background:#ff5f57"></span><span style="background:#febc2e"></span><span style="background:#28c840"></span></div>
+    <div class="url"><i>●</i>freitagspizza.example/admin/incidents/INC-1842</div></div>
+  <div class="view">
+    <div class="abar">🍕 <b>Freitags Pizza · Ops admin</b><span class="pill p-ok" style="background:#e8f5e9;color:#2e7d32">site: healthy</span><span class="pill" style="background:#e8f5e9;color:#2e7d32">live code: fix/inc-1842 @ 443d1478</span><span class="pill" style="background:#fff4d6;color:#8a5a00">orders tonight: 63</span></div>
+    <div class="anav"><div>Dashboard</div><div class="on">Incidents</div><div>Agent runs</div><div>Owner inbox</div><div>Settings</div></div>
+    <div class="amain"><div class="doc" id="doc">
+      <div class="top"><h2>Postmortem · INC-1842</h2><span class="res">Resolved</span></div>
+      <div class="by">Friday 17 Oct, 18:42 · Written by the self-healing agent · Diagnosis by Claude</div>
+      <div class="stats">
+        <div class="stat"><b>8 s</b><span>to detect</span></div>
+        <div class="stat"><b>24 s</b><span>to fix and deploy</span></div>
+        <div class="stat"><b>0</b><span>orders lost</span></div>
+        <div class="stat"><b>14</b><span>customers asked to retry</span></div>
+      </div>
+      <div class="sec"><h3>WHAT HAPPENED</h3><p>During the Friday rush your website's ordering system, run by the hosting vendor, was overloaded and turned away some requests. Customers adding toppings were asked to try again instead of seeing an error.</p></div>
+      <div class="sec"><h3>TIMELINE</h3>
+        <div class="tlrow"><span class="mono">18:41:59</span><span>Vendor starts rejecting requests (HTTP 429)</span></div>
+        <div class="tlrow"><span class="mono">18:42:07</span><span>Health check fails, alert raised</span></div>
+        <div class="tlrow"><span class="mono">18:42:15</span><span>Claude identifies the root cause</span></div>
+        <div class="tlrow"><span class="mono">18:42:18</span><span>Fix committed to <span class="code">fix/inc-1842</span></span></div>
+        <div class="tlrow"><span class="mono">18:42:27</span><span>Automated test customer passes 5/5 checks</span></div>
+        <div class="tlrow" style="border:0"><span class="mono">18:42:31</span><span>Fix live, customers can order again</span></div>
+      </div>
+      <div class="sec"><h3>ROOT CAUSE</h3><p>The shop's cart code gave up on the first "busy" answer from the vendor. The vendor's own docs say to wait briefly and retry.</p></div>
+      <div class="sec"><h3>WHAT WE CHANGED</h3><p>The site now quietly retries when the vendor is busy, and makes sure a topping or pizza is never added twice. Commit <span class="code">443d1478</span> on <span class="code">fix/inc-1842</span> · tests passed.</p></div>
+      <div class="sec"><h3>FOLLOW-UPS</h3>
+        <div class="fu">☐ Ask the vendor to raise our rate limit for Friday and Saturday evenings</div>
+        <div class="fu">☐ Review the fix and merge <span class="code">fix/inc-1842</span> into main</div>
+        <div class="fu">☑ Health check keeps running every 8 seconds</div>
+      </div>
+      <div class="acts"><span id="approve">Approve postmortem</span><span class="g">Ask the agent a question</span></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ============ CARDS ============ -->
+<div class="card-ov" id="title"><h1>Freitags Pizza</h1><p>Friday, 18:41. Rush hour. A customer wants to order a pizza.</p><small>DEMO · SELF-HEALING STOREFRONT</small></div>
+<div class="card-ov" id="i1"><div class="inter">Meanwhile, behind the scenes…</div></div>
+<div class="card-ov" id="i2"><div class="inter">Back to the customer</div></div>
+<div class="card-ov" id="i3"><div class="inter">Later that evening, the owner checks in</div></div>
+<div class="card-ov" id="end"><h1>Happy customer. <em>Fix in git.</em><br>Owner informed.</h1>
+  <p>Alert → evidence → Claude's diagnosis → commit → re-test → deploy → postmortem.<br>Nobody had to call the vendor.</p><small>FREITAGS PIZZA · CLAUDE IMPACT LAB BERLIN</small></div>
+
+<div id="caption"><b id="cap-n"></b><span id="cap-t"></span></div>
+<div id="ripple"></div>
+<svg id="cursor" viewBox="0 0 26 34"><path d="M2 2 L2 27 L8.5 21 L13 31 L17 29.2 L12.6 19.6 L21.5 19.6 Z" fill="#111" stroke="#fff" stroke-width="2" stroke-linejoin="round"/></svg>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+const between=(t,a,b)=>t>=a&&t<b;
+const show=(s,on,d='block')=>{$(s).style.display=on?d:'none'};
+const fade=(t,a,b,f=0.4)=>clamp(Math.min((t-a)/f,(b-t)/f),0,1);
+const easeOut=x=>1-Math.pow(1-clamp(x,0,1),3);
+const DUR=104;
+
+// ---- scene windows ----
+const SC={title:[0,3.6],shop1:[3.2,28.0],i1:[27.6,29.8],agent:[29.4,58.0],i2:[57.6,59.6],shop2:[59.2,80.0],i3:[79.6,81.8],admin:[81.4,98.6],end:[98.2,DUR+1]};
+const CLICKS=[9.2,14.4,16.6,19.0,23.4,60.8,62.7,64.3,65.9,69.0,73.1,95.4];
+const CAPS=[
+ [3.9,14.3,'1 · ORDER PAGE','A customer lands on the order page during the Friday rush'],
+ [14.3,19.1,'2 · CUSTOMIZE','They build their own pizza. Each topping saves to the order.'],
+ [19.1,27.4,'2 · CUSTOMIZE','The vendor fails (HTTP 429). The customer is asked to retry, not shown an error.'],
+ [29.9,34.9,'3 · SELF-HEALING AGENT','The agent sees the failures and raises an alert'],
+ [34.9,41.1,'3 · SELF-HEALING AGENT','It gathers evidence and asks Claude for the root cause'],
+ [41.1,47.7,'3 · SELF-HEALING AGENT','It writes the fix and commits it to its own git branch'],
+ [47.7,53.1,'3 · SELF-HEALING AGENT','It re-tests, then deploys. 24 seconds, no human needed.'],
+ [53.1,57.5,'3 · SELF-HEALING AGENT','It notifies the owner and drafts the postmortem'],
+ [59.8,65.6,'4 · RETRY','The customer taps Try again, and this time it works'],
+ [65.6,69.9,'4 · CHECKOUT','They finish customizing and check out'],
+ [70.0,79.4,'5 · HAPPY CUSTOMER','Order placed. They never saw an error code.'],
+ [81.9,89.0,'6 · POSTMORTEM','The owner opens the admin page: the agent wrote the postmortem'],
+ [89.0,98.0,'6 · POSTMORTEM','Impact, timeline, root cause, the fix in git and follow-ups, in plain words'],
+];
+
+// topping pieces on the pizza (relative to 290px pie)
+const TP={0:['🍄',[[95,105],[190,120],[140,200],[215,190],[80,175]]],1:['🫒',[[150,90],[110,150],[200,160],[160,235],[70,130]]],
+          2:['🌿',[[125,120],[175,100],[100,210],[230,145],[185,215]]],3:['🌶️',[[140,140],[210,95],[90,95],[150,180],[230,220]]]};
+(function(){const pie=$('#pie');for(const k in TP){TP[k][1].forEach(([x,y],i)=>{const e=document.createElement('div');e.className='tp tp'+k;e.textContent=TP[k][0];e.style.left=x+'px';e.style.top=y+'px';e.dataset.i=i;pie.appendChild(e);});}})();
+
+// agent events
+const EVS=[
+ [30.4,'🚨','Alert received','18:42:07','add-to-cart failing · HTTP 429 · 3 of 5 health checks red'],
+ [32.6,'🔎','Collected evidence','18:42:09','Telemetry · 14 customer retry reports · recent git history · site/cart-client.js · vendor API docs'],
+ [35.0,'🧠','Asking Claude to diagnose','18:42:10','claude-opus-5-5'],
+ [38.2,'🩺','Diagnosis','18:42:15','Root cause: the cart client gives up on the first 429. The vendor says to retry with backoff and an Idempotency-Key.'],
+ [41.2,'📝','Committed fix to fix/inc-1842','18:42:18','443d1478 · Retry temporary vendor errors with an idempotency key'],
+ [47.8,'🧪','Re-test passed','18:42:27','5 / 5 checks · add-to-cart 212 ms · each add registers exactly once'],
+ [50.6,'🚀','Deployed to the live site','18:42:31','Live site now runs 443d1478'],
+ [53.2,'✉️','Owner notified','18:42:33','Plain-language summary sent · postmortem drafted for INC-1842'],
+];
+$('#evs').innerHTML=EVS.map((e,i)=>`<div class="ev" id="ev-${i}"><div class="ic">${e[1]}</div><div class="bd"><div class="tt">${e[2]}<span>${e[3]}</span></div><div class="ds" id="evd-${i}">${e[4]}</div></div></div>`).join('');
+$('#bars').innerHTML=Array.from({length:26},()=>'<i></i>').join('');
+
+// confetti
+const CONF=Array.from({length:70},(_,i)=>{const r=(n)=>{const x=Math.sin(i*99.13+n*7.7)*43758.5453;return x-Math.floor(x)};return{x:r(1)*1280,d:r(2)*1.2,v:180+r(3)*220,s:r(4)*6-3,c:['#c8102e','#e9b45f','#2e7d32','#f2b01e','#fff'][i%5],rot:r(5)*360}});
+$('#confetti').innerHTML=CONF.map((c,i)=>`<i class="conf" id="cf-${i}" style="background:${c.c}"></i>`).join('');
+
+function shopState(t){
+  const custOpen=between(t,9.6,66.4), drawer=between(t,66.4,69.8), done=t>=69.8;
+  show('#custm',custOpen,'flex'); show('#drawer',drawer); show('#confirm',done,'flex'); show('#menuview',!done);
+  $('#drawer').style.transform=`translateX(${(1-easeOut((t-66.4)/0.4))*440}px)`;
+  $('#custm').style.opacity=custOpen?clamp((t-9.6)/0.3,0,1):1;
+  $('#shop-url').textContent=done?'freitagspizza.example/order/FP-1842':custOpen?'freitagspizza.example/order/build/margherita':'freitagspizza.example/order';
+  $('#card-1').classList.toggle('hover',between(t,5.6,7.4));
+  $('#card-0').classList.toggle('hover',between(t,7.6,9.6));
+  $('#cartn').textContent=t>=66.4?1:0;
+  // toppings
+  const on={0:t>=14.4,1:t>=16.6,2:t>=61.4,3:t>=64.3}; const pend2=between(t,19.0,61.4);
+  for(let k=0;k<4;k++){ $('#chip-'+k).classList.toggle('on',on[k]); }
+  $('#chip-2').classList.toggle('pend',pend2); $('#chip-2-s').textContent=pend2?'not saved':'+1.20';
+  const tap={0:14.4,1:16.6,2:61.4,3:64.3};
+  document.querySelectorAll('.tp').forEach(e=>{const k=e.className.match(/tp(\d)/)[1]; const s=on[k]?easeOut((t-tap[k]-e.dataset.i*0.06)/0.25):0;
+    e.style.transform=`translate(-50%,-50%) scale(${s})`; e.style.opacity=1;});
+  const large=t>=62.7; ['#size-0','#size-1','#size-2'].forEach((s,i)=>$(s).classList.toggle('on',large?i===2:i===1));
+  const n=[0,1,2,3].filter(k=>on[k]).length; const price=9.5+1.2*n+(large?3:0);
+  $('#price').textContent='€'+price.toFixed(2); $('#addorder').textContent='Add to order · €'+price.toFixed(2);
+  const names=[['mushrooms',on[0]],['olives',on[1]],['rocket',on[2]],['chili',on[3]]].filter(x=>x[1]).map(x=>x[0]);
+  $('#psub').textContent=(large?'Large':'Medium')+(names.length?' · '+names.join(', '):'');
+  // save indicator
+  const saving=[[14.4,14.9],[16.6,17.1],[19.0,20.4],[23.4,24.3],[60.8,61.4],[62.7,63.1],[64.3,64.7]].some(([a,b])=>between(t,a,b));
+  const sv=$('#saved'); sv.className='saved'+(saving?' busy':'');
+  sv.innerHTML=saving?'Saving…':t<14.4?'<span style="color:var(--muted);font-weight:400">Nothing added yet</span>':between(t,20.4,61.4)?'<span style="color:#9a6b00">Waiting to save rocket</span>':'Saved to your order ✓';
+  const rb=between(t,20.4,61.4); show('#retrybox',rb,'flex');
+  $('#retry-t').innerHTML=t<23.4?'<b>The kitchen is very busy right now</b>We couldn\'t save your rocket yet. Your pizza is safe, tap to try again.'
+                                :'<b>Still busy, give it a moment</b>Your toppings are kept. Try again in a few seconds.';
+  const trying=between(t,23.4,24.3)||between(t,60.8,61.4);
+  $('#retry-btn').textContent=trying?'Trying…':'Try again'; $('#retry-btn').style.opacity=trying?.6:1;
+  // toast
+  let toast=null; if(between(t,61.4,63.0)) toast='🌿 Rocket added to your pizza'; if(between(t,66.4,68.0)) toast='🍕 Margherita (Large) added to your order';
+  show('#toast',!!toast); if(toast) $('#toast').textContent=toast;
+  $('#placeorder').textContent=between(t,69.0,69.8)?'Placing order…':'Place order';
+  // stars
+  for(let i=0;i<5;i++) $('#star-'+i).classList.toggle('on', t>=73.1 || (between(t,72.6,73.1)&&i<=4-(Math.floor((73.1-t)*10))));
+  $('#reply').textContent=t>=73.3?'😍 Super easy. Thank you!':'';
+  // confetti
+  CONF.forEach((c,i)=>{const e=$('#cf-'+i); const u=t-69.9-c.d; if(u<0||u>5){e.style.display='none';return;} e.style.display='block';
+    e.style.transform=`translate(${c.x+Math.sin(u*2+i)*30}px,${-30+u*c.v}px) rotate(${c.rot+u*200*c.s}deg)`;});
+}
+
+function agentState(t){
+  const degraded=between(t,30.4,50.6), fixed=t>=50.6;
+  $('#astatus').textContent=degraded?'Degraded':'Healthy'; $('#astatus').style.color=degraded?'#ff7b72':'#5fd38a';
+  const shift=fixed?Math.floor((t-50.6)/0.45):0; const base=[...Array(21).fill(1),...Array(5).fill(0)];
+  const seq=[...base,...Array(shift).fill(1)].slice(-26);
+  [...$('#bars').children].forEach((b,i)=>{const ok=seq[i]; b.style.height=(ok?60+((i*37)%30):18+((i*13)%14))+'px'; b.style.background=ok?'#2ea043':'#f85149';});
+  $('#errrate').textContent=fixed?'0%':'38% (HTTP 429)'; $('#errrate').style.color=fixed?'#5fd38a':'#ff7b72';
+  $('#retries').textContent=Math.min(14,9+Math.floor(Math.max(0,t-29.6)/4.2));
+  const lb=$('#livebadge'); lb.textContent=fixed?'LIVE: fix/inc-1842 @ 443d1478':'LIVE: main @ a4c62f0'; lb.className='pill '+(fixed?'p-ok':'p-info');
+  EVS.forEach((e,i)=>{const el=$('#ev-'+i); const vis=t>=e[0]; el.style.display=vis?'flex':'none'; el.style.opacity=clamp((t-e[0])/0.35,0,1);});
+  const thinking=between(t,35.0,38.2);
+  $('#evd-2').innerHTML=thinking?`claude-opus-5-5 · reading 5 sources<span class="spin" style="transform:rotate(${t*400}deg)"></span>`:'claude-opus-5-5 · answered in 5.1 s';
+  show('#diffp',between(t,41.2,47.6)); show('#healthp',!between(t,41.2,47.6));
+  const s=Math.round(clamp((t-30.4)/(50.6-30.4),0,1)*24); $('#ttf').textContent='00:'+String(s).padStart(2,'0');
+  $('#ttf').style.color=fixed?'#5fd38a':'#fff';
+}
+
+function adminState(t){
+  const doc=$('#doc'), view=$('.amain'); const max=Math.max(0,doc.scrollHeight-view.clientHeight+10);
+  doc.style.transform=`translateY(${-max*((x=>x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2)(clamp((t-86.0)/8.5,0,1)))}px)`;
+  const ap=t>=95.4; $('#approve').textContent=ap?'Approved ✓':'Approve postmortem'; $('#approve').style.background=ap?'var(--green)':'var(--red)';
+}
+
+function applyState(t){
+  const op=(k)=>{const[a,b]=SC[k];return clamp(Math.min((t-a)/0.4,(b-t)/0.4),0,1)};
+  $('#L-shop').style.opacity=Math.max(op('shop1'),op('shop2'));
+  $('#agent').style.opacity=op('agent'); $('#L-admin').style.opacity=op('admin');
+  $('#title').style.opacity=t<SC.title[1]-0.4?1:op('title');
+  ['i1','i2','i3'].forEach(k=>$('#'+k).style.opacity=op(k));
+  $('#end').style.opacity=op('end');
+  shopState(t); agentState(t); adminState(t);
+  let cap=null; for(const c of CAPS) if(between(t,c[0],c[1])) cap=c;
+  if(cap){$('#cap-n').textContent=cap[2];$('#cap-t').textContent=cap[3];$('#caption').style.opacity=fade(t,cap[0],cap[1],0.3);} else $('#caption').style.opacity=0;
+}
+
+// cursor keyframes [time, target|xy|'=', measure time, offset]
+const K=[
+ [3.5,[1040,640]],[4.6,'='],[6.2,'#card-1',6.2],[7.2,'='],[8.8,'#cust-btn-0',8.8],[9.6,'='],
+ [11.6,[420,380]],[13.0,'='],[14.1,'#chip-0',14.1],[14.8,'='],[16.3,'#chip-1',16.3],[17.2,'='],[18.7,'#chip-2',18.7],[19.6,'='],
+ [21.8,'#retry-btn',21.8],[24.6,'='],[25.6,[700,470]],[28,'='],
+ [59.2,[720,480]],[60.4,'#retry-btn',60.4],[61.2,'='],[62.4,'#size-2',62.4],[63.2,'='],[64.0,'#chip-3',64.0],[64.8,'='],[65.6,'#addorder',65.6],[66.4,'='],
+ [68.6,'#placeorder',68.6],[69.6,'='],[71.4,[650,460]],[72.8,'#star-4',72.8],[80,'='],
+ [81.4,[1050,560]],[84.5,[900,420]],[94.8,'#approve',94.8],[98.6,'='],
+];
+let KP=[];
+function init(){const st=$('#stage').getBoundingClientRect();let prev;
+  for(const k of K){let p; if(k[1]==='=')p=prev; else if(Array.isArray(k[1]))p=k[1];
+    else{applyState(k[2]);const r=$(k[1]).getBoundingClientRect();p=[r.left-st.left+r.width/2,r.top-st.top+r.height/2];}
+    KP.push([k[0],p]);prev=p;}}
+const ease=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+function cursorAt(t){ if(t<=KP[0][0])return KP[0][1];
+  for(let i=1;i<KP.length;i++){if(t<=KP[i][0]){const[t0,a]=KP[i-1],[t1,b]=KP[i];const e=ease((t-t0)/(t1-t0));
+    const arc=Math.sin(e*Math.PI)*Math.min(36,Math.hypot(b[0]-a[0],b[1]-a[1])*0.08);return[a[0]+(b[0]-a[0])*e,a[1]+(b[1]-a[1])*e-arc];}}
+  return KP[KP.length-1][1];}
+function cursorVisible(t){return between(t,3.5,27.7)||between(t,59.4,79.7)||between(t,81.6,98.3);}
+function render(t){
+  applyState(t);
+  const [x,y]=cursorAt(t); let press=false,rip=null;
+  for(const c of CLICKS){if(between(t,c,c+0.12))press=true; if(between(t,c,c+0.45))rip=(t-c)/0.45;}
+  const vis=cursorVisible(t); $('#cursor').style.display=vis?'block':'none';
+  $('#cursor').style.transform=`translate(${x-2}px,${y-2}px) scale(${press?0.86:1})`;
+  if(vis&&rip!==null){const r=8+rip*24;Object.assign($('#ripple').style,{left:(x-r)+'px',top:(y-r)+'px',width:2*r+'px',height:2*r+'px',opacity:1-rip});}
+  else $('#ripple').style.opacity=0;
+}
+init(); render(0);
+</script>
+</body></html>
