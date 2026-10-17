@@ -26,6 +26,23 @@ cp .env.example .env              # paste your ANTHROPIC_API_KEY into .env
 python3 -m venv .venv && .venv/bin/pip install anthropic
 .venv/bin/python server.py        # then open http://127.0.0.1:8000/admin
 ```
+### Run on a VM with Docker Compose (3 services + Valkey)
+Needs Docker Engine with the compose plugin. Everything is open source: nginx, Python, Node.js, git, Valkey.
+```bash
+git clone https://github.com/karthikeyanrathore/freitags-fix.impact.lab && cd freitags-fix.impact.lab
+cp .env.example .env              # optional: paste your ANTHROPIC_API_KEY
+docker compose up -d --build      # then open http://<vm-ip>:8080/admin
+```
+
+| Container | Role |
+|---|---|
+| `shop` (nginx) | Serves the live shop and `/admin`, routes `/api/*` to the services below |
+| `order-api` | The vendor's ordering API with the fault switch and idempotency keys |
+| `agent` | Health check every 8 s, incidents, Claude diagnosis, fix commits on `fix/…` branches, re-test, deploy |
+| `valkey` | Shared state between `order-api` and `agent` |
+
+The agent writes fix branches into the repo clone on the VM (`git branch --list 'fix/*'`). Spec: [`specs/003-compose-self-healing-service/`](specs/003-compose-self-healing-service/).
+
 With no API key the agent runs in **rehearsal mode**: the diagnosis is a canned answer (clearly labelled in the admin panel), and everything else is real (alert, git commit, re-test, deploy, digest).
 
 ### Demo script (admin panel at `/admin`, the shop is at `/` and also embedded on the right)

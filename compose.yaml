@@ -1,0 +1,58 @@
+# Freitags Pizza self-healing shop: 3 services + Valkey.
+#   docker compose up -d --build     then open http://<vm-ip>:8080/admin
+# Put ANTHROPIC_API_KEY in .env (git-ignored). Without it the agent runs in rehearsal mode.
+name: freitags
+
+services:
+  shop:
+    image: nginx:1.27-alpine
+    ports:
+      - "${SHOP_PORT:-8080}:80"
+    volumes:
+      - ./services/shop/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./admin:/srv/admin:ro
+      - live-site:/srv/live:ro
+    depends_on:
+      - order-api
+      - agent
+    restart: unless-stopped
+
+  order-api:
+    build:
+      context: .
+      dockerfile: services/order-api/Dockerfile
+    environment:
+      VALKEY_URL: redis://valkey:6379/0
+    depends_on:
+      - valkey
+    restart: unless-stopped
+
+  agent:
+    build:
+      context: .
+      dockerfile: services/agent/Dockerfile
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      VALKEY_URL: redis://valkey:6379/0
+      SHOP_URL: http://shop
+      REPO_DIR: /repo
+      LIVE_DIR: /live
+      MONITOR_INTERVAL: "8"
+    volumes:
+      - ./:/repo            # the git repo: fixes are commits on fix/<run-id> branches
+      - live-site:/live     # the agent "deploys" by writing the fixed site here
+    depends_on:
+      - valkey
+    restart: unless-stopped
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    volumes:
+      - valkey-data:/data
+    restart: unless-stopped
+
+volumes:
+  live-site:
+  valkey-data:
