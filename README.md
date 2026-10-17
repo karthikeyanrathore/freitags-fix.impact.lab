@@ -55,7 +55,7 @@ With no API key the agent runs in **rehearsal mode**: the diagnosis is a canned 
 **Live link:** [shop](http://66.201.4.39:8080/) · [admin](http://66.201.4.39:8080/admin) (Nebius VM, Docker Compose)
 
 ## Screenshots / demo
-🎬 **[Watch the 2-minute demo video](https://drive.google.com/file/d/1sZD-eK_KXpYB-PhEOCqz_jFhCkm9sSTA/view?usp=sharing)** (Google Drive)
+🎬 **[Watch the 2-minute demo video](https://drive.google.com/file/d/1BP1AuQ5eRQ9S1xeju6LEyB7AxpljM-XM/view)** (Google Drive)
 
 ## Team
 Teams of 5 (at least 1 builder, 1 product or design, 1 domain expert; plus founder or anyone). Link each name to a GitHub or LinkedIn profile, and replace the example row with your team.
