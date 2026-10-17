@@ -52,23 +52,6 @@ The agent writes fix branches into the repo clone on the VM (`git branch --list 
 
 With no API key the agent runs in **rehearsal mode**: the diagnosis is a canned answer (clearly labelled in the admin panel), and everything else is real (alert, git commit, re-test, deploy, digest).
 
-### Demo script (about 2 minutes)
-Open the admin panel at `/admin` ([live](http://66.201.4.39:8080/admin)). The customer view of the shop is embedded on the right, below the owner's inbox. On a laptop screen, scroll down to it, or open the shop (`/`) in a second window side by side.
-
-1. **Get ready.** Click **Reset demo**. Check the header: `live code: main @ …`, and the agent badge says `agent: Claude (claude-opus-5-5)`. If it says `REHEARSAL`, there is no API key and the diagnosis will be a canned answer. Leave **Monitoring** and **Autopilot** on.
-2. **A normal order.** In the customer view, click **Add** on a pizza. You see "Added Margherita 🍕" and the cart shows 1.
-3. **The vendor goes down.** Click **429 Too many requests** (503 and 504 also work). Click **Add** on another pizza. The customer sees *"Sorry, we couldn't add that (error 429). Please try again."*, and a second later it appears under **Bug findings from customers**.
-4. **The alert arrives.** The health check runs every 8 seconds. Within about 8 seconds the header shows **site: FAILING** and a red **INC-… · critical** alert appears with the failing checks. Click **Run health check now** to skip the wait. Autopilot launches the agent straight away (or click **🤖 Launch agent**).
-5. **The agent fixes it.** The **Agent run** timeline fills in:
-   - Alert received → Collected evidence → Asking Claude to diagnose → Diagnosis (what's failing, root cause, fix, risk).
-   - Committed fix to `fix/…`. Open **Code change (diff)** to show it.
-   - Re-ran health check: PASS → Deployed fix to the live site → Sent digest to the owner.
-
-   The header turns **site: healthy** with **live code: fix/… @ …**. In rehearsal mode the whole run takes about 4 seconds. Claude's diagnosis adds its own thinking time, so time one real run before you present.
-6. **The owner is told.** The **Owner's inbox** shows a plain-language summary: what happened, the effect on customers, what was changed and the test result, with the commit.
-7. **Customers can order again, with the outage still on.** The customer view reloads on the fixed code. Click **Add**: it takes about a second longer while the site quietly retries, then works. Open the cart and click **Place order**: *"✅ Order FP-… placed!"*. The 429 fault is still switched on.
-8. **Afterwards.** **Reset demo** turns the fault off and puts the original code back live, ready for the next run. Every fix stays in git (`git branch --list 'fix/*'`). Run with `PUSH_FIXES=1` to also push each fix branch to GitHub and link the commit in the owner's digest.
-
 **Live link:** [shop](http://66.201.4.39:8080/) · [admin](http://66.201.4.39:8080/admin) (Nebius VM, Docker Compose)
 
 ## Screenshots / demo
