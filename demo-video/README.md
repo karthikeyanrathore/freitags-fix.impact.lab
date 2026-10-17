@@ -22,7 +22,15 @@ Edit the `CAPS`, `CLICKS` and `K` (cursor keyframes) arrays in `scene.html` to c
 
 Credits: Playwright (Apache-2.0), FFmpeg (LGPL/GPL), DejaVu fonts.
 
-## Self-healing journey video (2:00)
+## Self-healing journey video v2 (2:00, current)
+
+`freitags-self-healing-journey-v2.mp4` is the same 2:00 cut as v1 below, with the Freitags Fix Agent brand added:
+- The three transition cards show the animated mascot, faint, behind the text, plus "Freitags Fix Agent · for every small business". Each card starts the mascot's loop at a good moment: fixing the slice with the wrench, or eating.
+- The end card leads with the lockup: mascot, wordmark, "Keeps every small business taking orders" and shop icons.
+
+`journey.html` now renders v2, using the mascot from [`../brand/`](../brand/). v1's source is in git at commit `63d1909`.
+
+## Self-healing journey video v1 (2:00)
 
 `freitags-self-healing-journey.mp4` (1920×1080, 30 fps, no audio):
 
@@ -33,5 +41,5 @@ Credits: Playwright (Apache-2.0), FFmpeg (LGPL/GPL), DejaVu fonts.
 It's scripted animation (`journey.html`, rendered by `rec_journey.py`). The diff, commit message and owner summary come from the agent's real output. Topping customization, the retry prompt and the postmortem page are not in the app yet.
 
 ```bash
-python3 rec_journey.py journey.html freitags-self-healing-journey.mp4   # ~8 min, length comes from window.TOTAL
+python3 rec_journey.py journey.html freitags-self-healing-journey-v2.mp4   # ~8 min, length comes from window.TOTAL
 ```

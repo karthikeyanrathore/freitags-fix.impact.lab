@@ -1,0 +1,35 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Freitags Fix Agent · brand preview</title>
+<style>
+  body{margin:0;background:#2a221c;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#fbf4e8}
+  .wrap{width:1280px;display:grid;grid-template-columns:400px 1fr;grid-template-rows:360px 720px;gap:0}
+  .tile{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .label{position:absolute;left:14px;top:10px;font-size:12px;letter-spacing:2px;color:#8d7f71;text-transform:uppercase}
+  #t1{background:#fff8ec} #t1 .label{color:#a08d79}
+  #t2{background:#17120f;gap:26px}
+  .word{font-family:"DejaVu Serif",Georgia,serif;font-weight:700;font-size:58px;line-height:1;letter-spacing:-1px}
+  .word em{font-style:normal;color:#e9b45f}
+  .tag{font-size:16px;color:#cbbda9;margin-top:10px;letter-spacing:.3px}
+  .biz{font-size:22px;margin-top:10px;letter-spacing:6px}
+  #t3{grid-column:1/3;background:#17120f}
+  .bgbot{position:absolute;left:50%;top:50%;transform:translate(-50%,-52%);opacity:.16}
+  .bgword{position:absolute;left:0;right:0;bottom:26px;text-align:center;font-family:"DejaVu Serif",Georgia,serif;font-weight:700;font-size:24px;letter-spacing:5px;color:#e9b45f;opacity:.4;white-space:nowrap}
+  .inter{position:relative;font-family:"DejaVu Serif",Georgia,serif;font-size:40px}
+</style></head>
+<body><div class="wrap">
+  <div class="tile" id="t1"><span class="label">Mascot</span><svg id="m1" width="330" height="314"></svg></div>
+  <div class="tile" id="t2"><span class="label">Logo lockup</span><svg id="m2" width="200" height="190"></svg>
+    <div><div class="word">Freitags <em>Fix</em> Agent</div><div class="tag">Keeps every small business taking orders</div><div class="biz">🍕 🧺 🥐 💐 ✂️ ☕</div></div></div>
+  <div class="tile" id="t3"><span class="label">Transition card (light version behind the text)</span>
+    <svg class="bgbot" id="m3" width="420" height="400"></svg><div class="bgword">FREITAGS FIX AGENT · FOR EVERY SMALL BUSINESS</div>
+    <div class="inter">Meanwhile, behind the scenes…</div></div>
+</div>
+<script src="fix-agent-bot.js"></script>
+<script>
+const bots = ["m1", "m2", "m3"].map(id => FixBot.create(document.getElementById(id), id));
+window.renderAll = t => bots.forEach(b => b.render(t));
+if (!location.search.includes("static")) {
+  const t0 = performance.now();
+  (function tick() { renderAll((performance.now() - t0) / 1000); requestAnimationFrame(tick); })();
+}
+</script></body></html>
