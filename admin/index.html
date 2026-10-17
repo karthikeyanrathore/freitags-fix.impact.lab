@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Freitags Pizza · Ops admin</title>
+<style>
+  :root { --bg: #f4f1ec; --card: #fff; --line: #e3dcd1; --ink: #231a13; --muted: #7a6a5c; --red: #c8102e; --green: #2e7d32; --amber: #b7791f; --blue: #2457c5; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; background: var(--bg); color: var(--ink); }
+  header { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 10px 16px; background: var(--ink); color: #fff; }
+  header h1 { font-size: 1.05rem; margin: 0 12px 0 0; }
+  .badge { padding: 3px 10px; border-radius: 12px; font-weight: 700; font-size: .8rem; background: #ffffff22; }
+  .badge.ok { background: var(--green); } .badge.bad { background: var(--red); } .badge.warn { background: var(--amber); }
+  .grid { display: grid; grid-template-columns: 330px minmax(380px, 1fr) 420px; gap: 12px; padding: 12px; align-items: start; }
+  @media (max-width: 1200px) { .grid { grid-template-columns: 1fr; } }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; }
+  .card h2 { font-size: .8rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; display: flex; justify-content: space-between; align-items: center; }
+  button { font: inherit; border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+  button.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  button.danger.on { background: var(--red); border-color: var(--red); }
+  button.primary { background: var(--blue); color: #fff; border-color: var(--blue); font-weight: 600; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+  .label { color: var(--muted); font-size: .8rem; width: 100%; }
+  .incident { border: 2px solid var(--red); background: #fdecea; border-radius: 10px; padding: 10px; margin-bottom: 10px; animation: pulse 1.4s ease-in-out 3; }
+  .incident.resolved { border-color: var(--green); background: #e8f5e9; animation: none; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 6px #c8102e33; } }
+  .incident strong { display: block; font-size: 1rem; }
+  .muted { color: var(--muted); font-size: .85rem; }
+  ul.feed { list-style: none; margin: 0; padding: 0; max-height: 260px; overflow: auto; }
+  ul.feed li { padding: 5px 0; border-bottom: 1px solid var(--line); font-size: .85rem; }
+  .dots { display: flex; gap: 4px; flex-wrap: wrap; }
+  .dot { width: 14px; height: 14px; border-radius: 4px; background: var(--green); }
+  .dot.bad { background: var(--red); }
+  .timeline { list-style: none; margin: 0; padding: 0; }
+  .timeline li { position: relative; padding: 0 0 12px 26px; border-left: 2px solid var(--line); margin-left: 8px; }
+  .timeline li::before { content: attr(data-icon); position: absolute; left: -12px; top: -2px; width: 22px; height: 22px; border-radius: 50%; background: #fff; border: 2px solid var(--line); display: grid; place-items: center; font-size: 12px; }
+  .timeline li:last-child { border-left-color: transparent; }
+  .timeline .t { font-weight: 600; } .timeline .ts { color: var(--muted); font-size: .75rem; margin-left: 6px; }
+  .timeline li.pending .t::after { content: " …"; animation: blink 1s infinite; } @keyframes blink { 50% { opacity: .2; } }
+  details { margin-top: 4px; } summary { cursor: pointer; color: var(--blue); font-size: .8rem; }
+  pre { background: #1e1b18; color: #eee; padding: 10px; border-radius: 8px; overflow: auto; max-height: 340px; font-size: .75rem; white-space: pre-wrap; word-break: break-word; }
+  pre .add { color: #7ee787; } pre .del { color: #ff7b72; } pre .hunk { color: #79c0ff; }
+  .kv { display: grid; grid-template-columns: 110px 1fr; gap: 4px 8px; font-size: .85rem; margin-top: 4px; }
+  .kv b { color: var(--muted); font-weight: 600; }
+  .email { border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .email .head { background: #faf7f2; padding: 8px 12px; font-size: .8rem; color: var(--muted); border-bottom: 1px solid var(--line); }
+  .email .body { padding: 12px; } .email h3 { margin: 0 0 8px; font-size: 1.05rem; }
+  .email p { margin: 0 0 8px; } .email .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; background: #e8f5e9; color: var(--green); font-weight: 700; font-size: .8rem; }
+  .email .pill.bad { background: #fdecea; color: var(--red); }
+  .rehearsal { background: #fff4d6; border: 1px dashed var(--amber); color: #7a5300; padding: 4px 8px; border-radius: 6px; font-size: .8rem; margin-bottom: 8px; }
+  iframe { width: 100%; height: 560px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+  select { font: inherit; padding: 4px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>🍕 Freitags Pizza · Ops admin</h1>
+  <span class="badge" id="siteBadge">site: …</span>
+  <span class="badge" id="liveBadge">live code: …</span>
+  <span class="badge" id="agentBadge">agent: …</span>
+  <span class="badge" id="ordersBadge">orders: 0</span>
+</header>
+
+<div class="grid">
+  <!-- left: controls and incoming signals -->
+  <div>
+    <div class="card">
+      <h2>Demo controls</h2>
+      <div class="row"><span class="label">Vendor outage (fault switch)</span>
+        <button data-fault="none">None</button><button class="danger" data-fault="429">429 Too many requests</button>
+        <button class="danger" data-fault="503">503 Unavailable</button><button class="danger" data-fault="504">504 Timeout</button></div>
+      <div class="row"><span class="label">Automation</span>
+        <button id="monBtn">Monitoring</button><button id="autoBtn">Autopilot (auto-launch agent)</button></div>
+      <div class="row"><button id="checkBtn">Run health check now</button><button class="primary" id="agentBtn">🤖 Launch agent</button></div>
+      <div class="row"><button id="resetBtn">Reset demo</button><span class="muted" id="ctlMsg"></span></div>
+    </div>
+
+    <div class="card">
+      <h2>Alerts <span class="muted" id="checkAge"></span></h2>
+      <div id="incident"><p class="muted">No open alerts.</p></div>
+      <div class="label">Synthetic health checks (newest right)</div>
+      <div class="dots" id="dots"></div>
+      <div id="lastCheck"></div>
+    </div>
+
+    <div class="card">
+      <h2>Bug findings from customers <span class="muted" id="findCount"></span></h2>
+      <ul class="feed" id="findings"></ul>
+    </div>
+  </div>
+
+  <!-- middle: the agent -->
+  <div>
+    <div class="card">
+      <h2>Agent run <select id="runSel"></select></h2>
+      <div id="run"><p class="muted">No agent runs yet. Turn on a fault: the health check raises an alert and the agent launches.</p></div>
+    </div>
+  </div>
+
+  <!-- right: owner's view and customer's view -->
+  <div>
+    <div class="card">
+      <h2>Owner's inbox</h2>
+      <div id="digest"><p class="muted">The owner's digest appears here after the agent finishes.</p></div>
+    </div>
+    <div class="card">
+      <h2>Customer view <button id="reloadSite">Reload</button></h2>
+      <iframe id="site" src="/"></iframe>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const time = iso => iso ? new Date(iso).toLocaleTimeString() : "";
+const post = (url, body = {}) => fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).then(r => r.json());
+const ICON = { alert: "🚨", context: "🔎", thinking: "🧠", diagnosis: "🩺", commit: "📝", retest: "🧪", deploy: "🚀", digest: "✉️", escalate: "🙋", error: "⚠️" };
+const openKeys = new Set();
+let state = null, selectedRun = null, lastRef = null, lastHtml = {};
+
+document.addEventListener("toggle", e => {
+  const k = e.target.dataset?.key; if (!k) return;
+  e.target.open ? openKeys.add(k) : openKeys.delete(k);
+}, true);
+const det = (key, label, inner) => `<details data-key="${key}" ${openKeys.has(key) ? "open" : ""}><summary>${label}</summary>${inner}</details>`;
+const json = o => `<pre>${esc(JSON.stringify(o, null, 2))}</pre>`;
+const diffHtml = d => `<pre>${esc(d).split("\n").map(l =>
+  l.startsWith("+") && !l.startsWith("+++") ? `<span class="add">${l}</span>` :
+  l.startsWith("-") && !l.startsWith("---") ? `<span class="del">${l}</span>` :
+  l.startsWith("@@") ? `<span class="hunk">${l}</span>` : l).join("\n")}</pre>`;
+function set(id, html) { if (lastHtml[id] !== html) { $(id).innerHTML = html; lastHtml[id] = html; } }
+
+function stepsTable(check) {
+  return `<div class="kv">${(check.steps || []).map(s =>
+    `<b>${s.ok ? "✅" : "❌"} ${esc(s.status ?? (s.ok ? "" : "check"))}</b><span>${esc(s.name)} · ${s.latency_ms} ms${s.error ? ` · <span style="color:var(--red)">${esc(s.error)}</span>` : ""}</span>`).join("")}</div>`;
+}
+
+function eventBody(ev, key) {
+  const d = ev.detail || {};
+  switch (ev.kind) {
+    case "alert": return `<div class="muted">${esc(d.summary)} · source: ${esc(d.source)}</div>` + det(key, "Telemetry", json(d.health_check));
+    case "context": return `<div class="muted">Read ${d.files.map(esc).join(", ")} · ${d.customer_errors} customer error reports · live code ${esc(d.live_code)}</div>` + det(key, "Recent git history", `<pre>${esc(d.git_log)}</pre>`);
+    case "thinking": return `<div class="muted">Model: ${esc(d.model)}</div>`;
+    case "diagnosis": return `<div class="kv"><b>What's failing</b><span>${esc(d.diagnosis)}</span><b>Root cause</b><span>${esc(d.root_cause)}</span><b>Fix</b><span>${esc(d.fix_summary)}</span><b>Risk</b><span>${esc(d.risk)}</span></div>
+      <div class="muted">${esc(d.model)} · ${d.seconds}s · ${d.input_tokens} in / ${d.output_tokens} out tokens</div>`;
+    case "commit": return `<div class="muted"><code>${esc(d.sha.slice(0, 8))}</code> on <code>${esc(d.branch)}</code>: ${esc(d.subject)}${d.url ? ` · <a href="${esc(d.url)}" target="_blank">view on GitHub</a>` : ""}</div>` + det(key, "Code change (diff)", diffHtml(d.diff));
+    case "retest": return stepsTable(d);
+    case "deploy": return `<div class="muted">Live site now runs <code>${esc(d.sha.slice(0, 8))}</code> from <code>${esc(d.branch)}</code></div>`;
+    case "digest": case "escalate": return `<div class="muted">${esc(d.headline)}</div>`;
+    case "error": return `<div style="color:var(--red)">${esc(d.error)}</div>` + det(key, "Trace", `<pre>${esc(d.trace)}</pre>`);
+  }
+  return "";
+}
+
+function renderRun(run) {
+  if (!run) return;
+  const evs = run.events.map((ev, i) => `<li data-icon="${ICON[ev.kind] || "•"}" class="${run.status === "running" && i === run.events.length - 1 && ev.kind === "thinking" ? "pending" : ""}">
+    <span class="t">${esc(ev.title)}</span><span class="ts">${time(ev.ts)}</span>${eventBody(ev, run.id + ":" + i)}</li>`).join("");
+  const secs = run.finished ? ` · ${((new Date(run.finished) - new Date(run.started)) / 1000).toFixed(1)}s` : "";
+  set("run", (run.mode === "rehearsal" ? `<div class="rehearsal">REHEARSAL MODE: no API key, so the diagnosis is a canned answer, not Claude. Everything else (git commit, re-test, deploy) is real.</div>` : "")
+    + `<div class="muted" style="margin-bottom:10px">Run ${esc(run.id)} · <b>${esc(run.status)}</b>${secs}</div><ul class="timeline">${evs}</ul>`);
+}
+
+function renderDigest(run) {
+  const d = run?.digest;
+  if (!d) return set("digest", `<p class="muted">${run?.status === "running" ? "The agent is working. The owner will get a summary when it's done." : "The owner's digest appears here after the agent finishes."}</p>`);
+  set("digest", `${d.rehearsal ? `<div class="rehearsal">Rehearsal digest (canned text)</div>` : ""}<div class="email">
+    <div class="head">From: Site reliability agent · To: Freitags Pizza owner · ${time(run.finished)}</div>
+    <div class="body"><h3>${esc(d.headline)}</h3>
+      <p><b>What happened:</b> ${esc(d.what_happened)}</p>
+      <p><b>Effect on customers:</b> ${esc(d.customer_impact)}</p>
+      <p><b>What we changed:</b> ${esc(d.what_we_changed)}</p>
+      <p><span class="pill ${d.test === "Passed" ? "" : "bad"}">${esc(d.status)}</span></p>
+      <p class="muted">Record: ${d.commit ? `commit <code>${esc(d.commit)}</code> on ` : ""}<code>${esc(d.branch)}</code>${d.commit_url ? ` · <a href="${esc(d.commit_url)}" target="_blank">open</a>` : ""} · Test: ${esc(d.test)}</p></div></div>`);
+}
+
+function render(s) {
+  const last = s.checks[s.checks.length - 1];
+  $("siteBadge").textContent = "site: " + (!last ? "not checked yet" : last.ok ? "healthy" : "FAILING");
+  $("siteBadge").className = "badge " + (!last ? "" : last.ok ? "ok" : "bad");
+  $("liveBadge").textContent = `live code: ${s.live.branch} @ ${s.live.ref}`;
+  $("liveBadge").className = "badge " + (s.live.branch.startsWith("fix/") ? "ok" : "");
+  $("agentBadge").textContent = s.mode === "claude" ? `agent: Claude (${s.model})` : "agent: REHEARSAL (no API key)";
+  $("agentBadge").className = "badge " + (s.mode === "claude" ? "" : "warn");
+  $("ordersBadge").textContent = `orders: ${s.orders}`;
+  document.querySelectorAll("[data-fault]").forEach(b => b.classList.toggle("on", b.dataset.fault === s.fault));
+  $("monBtn").classList.toggle("on", s.monitoring); $("autoBtn").classList.toggle("on", s.autopilot);
+  $("agentBtn").disabled = s.agent_busy;
+
+  const inc = s.incident;
+  set("incident", inc ? `<div class="incident"><strong>🚨 ${esc(inc.id)} · ${esc(inc.severity)}</strong>
+      ${esc(inc.summary)}<div class="muted">Opened ${time(inc.opened)} · ${esc(inc.source)} · status: ${esc(inc.status || "open")}</div>
+      ${det("inc:" + inc.id, "Alert telemetry", json(inc.health_check))}</div>` : `<p class="muted">No open alerts.</p>`);
+  set("dots", s.checks.map(c => `<span class="dot ${c.ok ? "" : "bad"}" title="${esc(c.source)} ${time(c.timestamp)}"></span>`).join(""));
+  set("lastCheck", last ? `<div class="muted" style="margin-top:6px">Last: ${time(last.timestamp)} (${esc(last.source)}, ${esc(last.client)})</div>${stepsTable(last)}` : "");
+  $("findCount").textContent = s.findings.length ? `(${s.findings.length})` : "";
+  set("findings", s.findings.slice().reverse().map(f => `<li>❌ <b>${esc(f.action)}</b> failed (${esc(f.status ?? "network")}) <span class="muted">${time(f.ts)}</span></li>`).join("")
+    || `<li class="muted">No errors reported by customers.</li>`);
+
+  const ids = s.runs.map(r => r.id).reverse();
+  if (!selectedRun || !ids.includes(selectedRun) || (state && state.runs.length !== s.runs.length)) selectedRun = ids[0];
+  set("runSel", ids.map(id => `<option ${id === selectedRun ? "selected" : ""}>${id}</option>`).join(""));
+  const run = s.runs.find(r => r.id === selectedRun);
+  renderRun(run); renderDigest(run);
+
+  if (lastRef && lastRef !== s.live.ref) $("site").contentWindow.location.reload();  // new code deployed
+  lastRef = s.live.ref;
+  state = s;
+}
+
+async function poll() {
+  try { render(await (await fetch("/api/state")).json()); } catch (e) { $("siteBadge").textContent = "admin server unreachable"; }
+  setTimeout(poll, 1000);
+}
+
+document.querySelectorAll("[data-fault]").forEach(b => b.onclick = () => post("/api/admin/fault", { mode: b.dataset.fault }).then(render));
+$("monBtn").onclick = () => post("/api/admin/monitor", { on: !state.monitoring }).then(render);
+$("autoBtn").onclick = () => post("/api/admin/autopilot", { on: !state.autopilot }).then(render);
+$("checkBtn").onclick = async () => { $("ctlMsg").textContent = "Checking…"; const r = await post("/api/admin/check"); $("ctlMsg").textContent = r.ok ? "Healthy" : "Failing"; };
+$("agentBtn").onclick = async () => { const r = await post("/api/admin/agent"); $("ctlMsg").textContent = r.error || `Agent launched (${r.run_id})`; };
+$("resetBtn").onclick = () => post("/api/admin/reset").then(s => { $("ctlMsg").textContent = "Reset"; render(s); $("site").contentWindow.location.reload(); });
+$("reloadSite").onclick = () => $("site").contentWindow.location.reload();
+$("runSel").onchange = e => { selectedRun = e.target.value; render(state); };
+poll();
+</script>
+</body>
+</html>
