@@ -61,7 +61,7 @@ With no API key the agent runs in **rehearsal mode**: the diagnosis is a canned 
 **Live link (if any):** <link>
 
 ## Screenshots / demo
-<Drop screenshots here, or link your 2-minute demo video.>
+🎬 **[Watch the 2-minute demo video](https://drive.google.com/file/d/1sZD-eK_KXpYB-PhEOCqz_jFhCkm9sSTA/view?usp=sharing)** (Google Drive)
 
 ## Team
 Teams of 5 (at least 1 builder, 1 product or design, 1 domain expert; plus founder or anyone). Link each name to a GitHub or LinkedIn profile, and replace the example row with your team.
